@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ["*"]
+  push:
+    branches: ["main"]
+  merge_group:
+
+env:
+  HUSKY: 0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Start setting up postgres container"
+        run: |
+          # start preparing the postgres container, if you run tests too soon, it will fail
+          docker run -d -p 5432:5432 -e POSTGRES_DB=typefusion -e POSTGRES_PASSWORD=password postgres:14-alpine
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+
+      - name: Setup Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm install
+
+      - name: Build and lint and type-check
+        run: pnpm build && pnpm turbo --env-mode=loose lint test-ci typecheck
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/typefusion?sslmode=disable
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

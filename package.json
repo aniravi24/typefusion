@@ -1,0 +1,49 @@
+{
+  "name": "@typefusion/root",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "turbo --filter \"./packages/*\" build",
+    "changeset": "changeset",
+    "dev": "turbo --filter \"./packages/*\" dev",
+    "docgen": "typedoc",
+    "format": "prettier --write .",
+    "lint": "eslint . && prettier --check .",
+    "lint-fix": "eslint --fix . && prettier --write .",
+    "release": "pnpm run build && changeset publish",
+    "test": "turbo test",
+    "test-ci": "turbo test-ci",
+    "typecheck": "turbo typecheck"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-git"
+    }
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "0.5.0",
+    "@changesets/cli": "2.27.7",
+    "@commitlint/cli": "19.4.1",
+    "@commitlint/config-conventional": "19.4.1",
+    "@manypkg/cli": "0.21.4",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "commitizen": "4.3.0",
+    "cz-git": "1.9.4",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-simple-import-sort": "12.1.1",
+    "eslint-plugin-sort-keys": "2.3.5",
+    "eslint-plugin-typescript-sort-keys": "3.2.0",
+    "husky": "9.1.5",
+    "prettier": "3.3.3",
+    "prettier-plugin-sort-json": "4.0.0",
+    "tsup": "8.2.4",
+    "turbo": "2.1.1",
+    "typedoc": "0.26.6",
+    "typedoc-github-theme": "0.1.2",
+    "typescript": "5.5.4"
+  },
+  "packageManager": "pnpm@9.6.0"
+}

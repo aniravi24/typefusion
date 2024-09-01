@@ -1,0 +1,65 @@
+{
+  "name": "typefusion",
+  "version": "0.0.1",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "keywords": [
+    "etl",
+    "dbt",
+    "postgresql",
+    "postgres",
+    "tasks",
+    "typescript",
+    "effect",
+    "database"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aniravi24/typefusion",
+    "directory": "packages/typefusion"
+  },
+  "bin": {
+    "typefusion": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./effect": "./dist/effect.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "coverage": "vitest --config ./vitest.config.ts --coverage",
+    "test": "dotenv -- vitest",
+    "test-ci": "tsc -p tsconfig.example.json && dotenv -- vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "build-example-watch": "tsc -w -p tsconfig.example.json",
+    "clean": "rm -rf dist && rm -rf test/examplejs",
+    "example": "dotenv -- tsx src/cli.ts --ignore \"**/src/**\" ./test/examplejs",
+    "example-debug": "dotenv -- tsx src/cli.ts --log-level debug --ignore \"**/src/**\" ./test/examplejs"
+  },
+  "dependencies": {
+    "@effect/cli": "0.42.0",
+    "@effect/platform": "0.63.0",
+    "@effect/platform-node": "0.58.0",
+    "@effect/schema": "0.72.0",
+    "@effect/sql": "0.10.0",
+    "@effect/sql-pg": "0.10.0",
+    "effect": "3.7.0",
+    "postgres": "3.4.4",
+    "skott": "0.35.2",
+    "tslib": "2.7.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "2.0.5",
+    "dotenv-cli": "7.4.2",
+    "tsx": "4.19.0",
+    "type-fest": "4.26.0",
+    "vite": "5.4.2",
+    "vite-tsconfig-paths": "5.0.1",
+    "vitest": "2.0.5"
+  }
+}

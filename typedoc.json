@@ -1,0 +1,8 @@
+{
+  "entryPointStrategy": "packages",
+  "entryPoints": ["packages/*"],
+  "includeVersion": true,
+  "name": "Typefusion",
+  "out": "docs",
+  "plugin": ["typedoc-github-theme"],
+}

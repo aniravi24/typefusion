@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+	  "declaration": false,
+	  "declarationMap": false,
+	  "noEmit": false,
+	  "outDir": "./test/examplejs"
+	},
+	"exclude": ["dist"],
+	"extends": "../../tsconfig.json",
+	"include": ["example"]
+      }
