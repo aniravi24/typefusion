@@ -96,6 +96,8 @@ To begin using Typefusion, follow these steps:
 
    Compile your scripts into your directory of choice. Typefusion runs on the JS output, not on the original typescript scripts. Make sure not to bundle your scripts so that the directory layout is preserved.
 
+   **Warning:** Typefusion is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and does not provide a CommonJS export.
+
    Typefusion can be used in two primary modes: CLI and library. Both modes offer similar functionality, allowing you to choose the most suitable approach for your project.
 
 ### CLI
