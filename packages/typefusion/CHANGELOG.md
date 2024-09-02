@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.4
+
+### Patch Changes
+
+- [`bae3d1f`](https://github.com/aniravi24/typefusion/commit/bae3d1fa04e7b2bb1f301030b75a51af6869fba2) Thanks [@aniravi24](https://github.com/aniravi24)! - ESM only
+
 ## 0.0.3
 
 ### Patch Changes
