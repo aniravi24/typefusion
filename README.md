@@ -14,6 +14,7 @@
   - [Typefusion Ref](#typefusion-ref)
   - [Examples](#examples)
   - [Docs](#docs)
+  - [Effect](#effect)
   - [Have an issue?](#have-an-issue)
   - [Contributions](#contributions)
 
@@ -176,6 +177,10 @@ You can find the remaining examples [here](packages/typefusion/example).
 ## Docs
 
 Reference docs can be found at [https://aniravi24.github.io/typefusion](https://aniravi24.github.io/typefusion). JSDoc comments are used to document more details not covered in this README.
+
+## Effect
+
+This library was built with [Effect](https://effect.website). Typefusion has some support for Effect, which you can find in the reference docs (anything suffixed with `Effect`).
 
 ## Have an issue?
 
