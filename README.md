@@ -21,7 +21,7 @@
 
 ## Introduction
 
-Typefusion is a powerful tool that allows you to run TypeScript scripts and materialize the results into a database (currently PostgreSQL only). It enables you to create complex workflows by allowing scripts to reference each other's results. Inspired by [Data Build Tool (DBT)](https://www.getdbt.com/), Typefusion brings similar concepts to the TypeScript ecosystem, providing a solution for data transformation and workflow management.
+Typefusion allows you to run TypeScript scripts and materialize the results into a database (currently PostgreSQL only). It enables you to create complex workflows by allowing scripts to reference each other's results. Inspired by [Data Build Tool (DBT)](https://www.getdbt.com/).
 
 ## Key Features
 
