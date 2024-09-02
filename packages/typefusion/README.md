@@ -1,4 +1,4 @@
-TypeScript-first job processing library, backed by Postgres.
+Typefusion is a tool inspired by DBT that lets you run typescript scripts, and the results are materialized into a database.
 
 # Documentation
 
