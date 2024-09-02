@@ -17,6 +17,7 @@ export interface TypefusionConfig {
   ignoreGlob: string[];
   verbose: boolean;
   alwaysPrintExecutionGraph?: boolean;
+  dryRun?: boolean;
 }
 
 /**
@@ -28,6 +29,10 @@ export interface TypefusionConfig {
  */
 export function typefusion(config: TypefusionConfig) {
   return Effect.gen(function* () {
+    if (config.dryRun) {
+      yield* Effect.log("Dry run enabled. No changes will be made.");
+    }
+
     const fileSystem = yield* FileSystem.FileSystem;
 
     const absolutePath = yield* fileSystem.realPath(
@@ -63,15 +68,20 @@ export function typefusion(config: TypefusionConfig) {
     yield* Effect.logDebug("executionGraph", graph);
 
     const executionLevels = traverseGraph(graph);
+
     yield* printExecutionGraph(
       executionLevels,
       config.alwaysPrintExecutionGraph,
     );
 
-    for (const level of executionLevels) {
-      yield* Effect.forEach(level, (file) => runModule(file), {
-        concurrency: "inherit",
-      });
+    if (!config.dryRun) {
+      for (const level of executionLevels) {
+        yield* Effect.forEach(level, (file) => runModule(file), {
+          concurrency: "inherit",
+        });
+      }
     }
+
+    return executionLevels;
   }).pipe(Effect.provide(SqlLive), Effect.provide(NodeFileSystem.layer));
 }

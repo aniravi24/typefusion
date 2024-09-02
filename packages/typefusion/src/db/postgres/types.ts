@@ -12,25 +12,23 @@ export type Nullable<T> = T | null;
  * const myCustomType = new PgType<Nullable<string>>("myCustomType");
  * ```
  */
-export class PgType<T> {
-  public _type: T;
+export class PgType<Type> extends Data.TaggedClass("PgType")<{
+  postgresType: string;
+}> {
   private _nullable: boolean;
-  private _postgresType: string;
   constructor(postgresType: string) {
-    // This is really more like a phantom type, it doesn't matter what it is at runtime
-    this._type = "PgType" as T;
+    super({ postgresType });
     this._nullable = true;
-    this._postgresType = postgresType;
   }
 
-  notNull(): PgType<Exclude<T, null>> {
+  notNull(): PgType<Exclude<Type, null>> {
     this._nullable = false;
-    return this as PgType<Exclude<T, null>>;
+    return this as PgType<Exclude<Type, null>>;
   }
 
-  nullable(): PgType<Nullable<T>> {
+  nullable(): PgType<Nullable<Type>> {
     this._nullable = true;
-    return this as PgType<Nullable<T>>;
+    return this as PgType<Nullable<Type>>;
   }
 
   getNullable(): boolean {
@@ -38,16 +36,16 @@ export class PgType<T> {
   }
 
   getPostgresType(): string {
-    return this._postgresType;
+    return this.postgresType;
   }
 
   // This is a bit of a hack to get the type of the underlying type
-  getType(): T {
-    return this._type;
+  getType(): Type {
+    return undefined as Type;
   }
 
-  toString(): string {
-    return `${this._postgresType}${this._nullable ? " " : " NOT NULL"}`;
+  override toString(): string {
+    return `${this.postgresType}${this._nullable ? " " : " NOT NULL"}`;
   }
 }
 
@@ -96,7 +94,11 @@ export class UnsupportedJSTypePostgresConversionError extends Data.TaggedError(
   message: string;
 }> {}
 
-// People shouldn't really use this function, it's only useful for the simplest of types
+/**
+ * @internal
+ * @param value Any input
+ * @returns A string representing the closest postgres type to that value. This function isn't meant to be used.
+ */
 export const valueToPostgresType = (value: unknown) =>
   Effect.gen(function* () {
     if (value === null || value === undefined) {
@@ -135,6 +137,11 @@ export const valueToPostgresType = (value: unknown) =>
     }
   });
 
+/**
+ * @internal
+ * @param type a {@link PgType}
+ * @returns a string representing the id column DDL
+ */
 export const postgresIdColumn = (type?: PgType<unknown>) => {
   const idType =
     type?.getPostgresType() || "BIGINT GENERATED ALWAYS AS IDENTITY";

@@ -13,7 +13,7 @@ import {
 // For some reason when we dynamically import the PgType when executing scripts, somePgType instanceof PgType is false
 const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
   if (typeof input === "object" && input !== null) {
-    return "_type" in input && input["_type"] === "PgType";
+    return "_tag" in input && input["_tag"] === "PgType";
   }
   return false;
 });
@@ -165,10 +165,15 @@ export const dbInsert = (module: TypefusionModule, result: unknown) =>
         ),
       );
 
-      const ddl = yield* convertTypefusionScriptResultToSQLDDL(module, result);
+      const columnDefinitions = yield* convertTypefusionScriptResultToSQLDDL(
+        module,
+        result,
+      );
+
+      yield* Effect.logDebug("columnDefinitions\n", columnDefinitions);
 
       yield* sql`CREATE TABLE IF NOT EXISTS "${sql.unsafe(module.name)}" (
-        ${sql.unsafe(ddl)}
+        ${sql.unsafe(columnDefinitions)}
       )`.pipe(
         Effect.mapError(
           (error) =>

@@ -38,7 +38,7 @@ jobs:
       - name: Build and lint and type-check
         run: pnpm build && pnpm turbo --env-mode=loose lint test-ci typecheck
         env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/typefusion?sslmode=disable
+          PG_DATABASE_URL: postgres://postgres:password@localhost:5432/typefusion?sslmode=disable
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

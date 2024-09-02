@@ -2,8 +2,11 @@ import { PgClient } from "@effect/sql-pg";
 import { Config, Redacted } from "effect";
 import postgres from "postgres";
 
+/**
+ * @internal
+ */
 export const DatabaseConfig = Config.orElse(
-  Config.redacted("DATABASE_URL"),
+  Config.redacted("PG_DATABASE_URL"),
   () =>
     Config.map(
       Config.all({
@@ -20,6 +23,9 @@ export const DatabaseConfig = Config.orElse(
     ),
 );
 
+/**
+ * @internal
+ */
 export const SqlLive = PgClient.layer({
   url: DatabaseConfig,
   types: Config.succeed({

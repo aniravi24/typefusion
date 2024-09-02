@@ -16,15 +16,18 @@ const ignoreGlob = Options.directory("ignore").pipe(
 
 const verbose = Options.boolean("verbose").pipe(Options.optional);
 
+const dryRun = Options.boolean("dry-run").pipe(Options.optional);
+
 const command = Command.make(
   "typefusion",
-  { directory, ignoreGlob, verbose },
-  ({ directory, ignoreGlob, verbose }) =>
+  { directory, ignoreGlob, verbose, dryRun },
+  ({ directory, ignoreGlob, verbose, dryRun }) =>
     typefusion({
       directory,
       ignoreGlob: Option.getOrElse(ignoreGlob, () => []),
       verbose: Option.getOrElse(verbose, () => false),
       alwaysPrintExecutionGraph: true,
+      dryRun: Option.getOrElse(dryRun, () => false),
     }),
 );
 

@@ -33,7 +33,7 @@
   "scripts": {
     "build": "tsup",
     "coverage": "vitest --config ./vitest.config.ts --coverage",
-    "test": "dotenv -- vitest",
+    "test": "tsc -p tsconfig.example.json && dotenv -- vitest",
     "test-ci": "tsc -p tsconfig.example.json && dotenv -- vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "build-example-watch": "tsc -w -p tsconfig.example.json",

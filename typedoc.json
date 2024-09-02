@@ -4,5 +4,6 @@
   "includeVersion": true,
   "name": "Typefusion",
   "out": "docs",
+  "excludeInternal": true,
   "plugin": ["typedoc-github-theme"],
 }

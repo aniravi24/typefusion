@@ -17,6 +17,8 @@
   - [Documentation](#documentation)
   - [Effect Integration](#effect-integration)
   - [Troubleshooting](#troubleshooting)
+    - [The graph is empty when I run Typefusion](#the-graph-is-empty-when-i-run-typefusion)
+    - [I'm seeing undefined errors for script imports](#im-seeing-undefined-errors-for-script-imports)
   - [Contributing](#contributing)
 
 ## Introduction
@@ -49,56 +51,52 @@ To begin using Typefusion, follow these steps:
 
 2. Configure your database connection using one of these methods:
 
-   - Set a full connection string in the `DATABASE_URL` environment variable.
+   - Set a full connection string in the `PG_DATABASE_URL` environment variable.
    - Set individual environment variables: `PGDATABASE`, `PGHOST`, `PGPORT`, `PGPASSWORD`, and `PGUSER`.
 
 3. Create a directory for your scripts (e.g., `workflows`).
 
 4. Write your TypeScript scripts in the created directory.
 
-5. Compile your TypeScript scripts into your desired output directory. Typefusion runs on the compiled JavaScript output, so ensure you don't bundle your scripts to preserve the directory layout.
+5. Compile your TypeScript scripts into your desired output directory (e.g. `scripts`). Typefusion runs on the compiled JavaScript output, so ensure you don't bundle your scripts to preserve the directory layout. Avoid outputting to directories like `dist` or `build` (see [Troubleshooting](#troubleshooting))
 
 ## Usage
 
-1. First, create a directory to store your scripts, such as `workflows`.
+After following the above instructions, create a script file in the directory, for example, `main.ts`:
 
-2. Then, create a script file in the directory, for example, `main.ts`:
+```ts
+import { pgType, TypefusionPgResult } from "typefusion";
 
-   ```ts
-   import { pgType, TypefusionPgResult } from "typefusion";
+export const mainSchema = {
+  id: pgType.integer().notNull(),
+  name: pgType.text().notNull(),
+  age: pgType.integer().notNull(),
+  email: pgType.text().notNull(),
+  address: pgType.text().notNull(),
+};
 
-   export const mainSchema = {
-     id: pgType.integer().notNull(),
-     name: pgType.text().notNull(),
-     age: pgType.integer().notNull(),
-     email: pgType.text().notNull(),
-     address: pgType.text().notNull(),
-   };
+export default async function main(): Promise<
+  TypefusionPgResult<typeof mainSchema>
+> {
+  console.log("running main");
+  return {
+    types: mainSchema,
+    data: [
+      {
+        id: 1,
+        name: "John Doe",
+        age: 30,
+        email: "john.doe@example.com",
+        address: "123 Main St",
+      },
+    ],
+  };
+}
+```
 
-   export default async function main(): Promise<
-     TypefusionPgResult<typeof mainSchema>
-   > {
-     console.log("running main");
-     return {
-       types: mainSchema,
-       data: [
-         {
-           id: 1,
-           name: "John Doe",
-           age: 30,
-           email: "john.doe@example.com",
-           address: "123 Main St",
-         },
-       ],
-     };
-   }
-   ```
+**Warning:** Typefusion is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and does not provide a CommonJS export.
 
-   Compile your scripts into your directory of choice. Typefusion runs on the JS output, not on the original typescript scripts. Make sure not to bundle your scripts so that the directory layout is preserved.
-
-   **Warning:** Typefusion is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and does not provide a CommonJS export.
-
-   Typefusion can be used in two primary modes: CLI and library. Both modes offer similar functionality, allowing you to choose the most suitable approach for your project.
+Typefusion can be used in two primary modes: CLI and library. Both modes offer similar functionality, allowing you to choose the most suitable approach for your project.
 
 ### CLI
 
@@ -197,7 +195,17 @@ Typefusion is built with [Effect](https://effect.website). Refer to the referenc
 
 ## Troubleshooting
 
-If you encounter any issues while using Typefusion:
+### The graph is empty when I run Typefusion
+
+This can happen because the library Typefusion depends on to generate the dependency graph ignores common build directories by default. For example, you cannot output scripts to `build`, `dist`, and several others ([full list here](https://github.com/antoine-coulon/skott/blob/main/packages/skott/src/modules/resolvers/base-resolver.ts#L95)).
+
+### I'm seeing undefined errors for script imports
+
+The recommended way to define your script function is using a default export and named function (not an anonymous function). The function does not have to be async. This way, Typefusion can properly resolve your module. Typefusion does not use any compiler magic or do any sort of file parsing.
+
+---
+
+If you encounter any other issues while using Typefusion:
 
 1. Check the [GitHub Issues](https://github.com/aniravi24/typefusion/issues) to see if your problem has been reported or resolved.
 2. Ensure you're using the latest version of Typefusion.
@@ -206,7 +214,7 @@ If you encounter any issues while using Typefusion:
 
 ## Contributing
 
-We welcome contributions to Typefusion! To contribute:
+Contributions to Typefusion are welcome! To contribute:
 
 1. Fork the repository and create your branch from `main`.
 2. If you've added code that should be tested, add tests.
