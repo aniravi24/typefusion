@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.5
+
+### Patch Changes
+
+- [`a8be8fc`](https://github.com/aniravi24/typefusion/commit/a8be8fc15a05dd2489541f64e6858d7c08e77099) Thanks [@aniravi24](https://github.com/aniravi24)! - Add dry run flag to CLI.
+
 ## 0.0.4
 
 ### Patch Changes
