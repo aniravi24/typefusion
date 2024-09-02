@@ -1,5 +1,0 @@
----
-"typefusion": patch
----
-
-fix readme
