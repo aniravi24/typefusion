@@ -1,5 +1,17 @@
+import { Data, Effect } from "effect";
+
 export type Nullable<T> = T | null;
 
+/**
+ * This is a simple wrapper class to represent a Postgres type that will be used to define a table.
+ * It also provides a fluent API to set properties of the column (e.g. nullability).
+ * You can easily create your own custom types by instantiating this class.
+ *
+ * @example
+ * ```ts
+ * const myCustomType = new PgType<Nullable<string>>("myCustomType");
+ * ```
+ */
 export class PgType<T> {
   public _type: T;
   private _nullable: boolean;
@@ -75,4 +87,56 @@ export const pgType = {
   jsonb: () => new PgType<Nullable<object>>("jsonb"),
   xml: () => new PgType<Nullable<string>>("xml"),
   bytea: () => new PgType<Nullable<Uint8Array>>("bytea"),
+};
+
+export class UnsupportedJSTypePostgresConversionError extends Data.TaggedError(
+  "UnsupportedJSTypePostgresConversionError",
+)<{
+  cause: unknown;
+  message: string;
+}> {}
+
+// People shouldn't really use this function, it's only useful for the simplest of types
+export const valueToPostgresType = (value: unknown) =>
+  Effect.gen(function* () {
+    if (value === null || value === undefined) {
+      return "TEXT";
+    }
+    if (value instanceof Date) {
+      return "TIMESTAMP WITH TIME ZONE";
+    }
+    switch (typeof value) {
+      case "object":
+        return "JSONB";
+      case "string":
+        return "TEXT";
+      case "bigint":
+        return "BIGINT";
+      case "number":
+        if (Number.isInteger(value)) {
+          // PostgreSQL INTEGER range: -2,147,483,648 to +2,147,483,647
+          const MIN_INTEGER = -2147483648;
+          const MAX_INTEGER = 2147483647;
+          if (value >= MIN_INTEGER && value <= MAX_INTEGER) {
+            return "INTEGER";
+          }
+          return "BIGINT";
+        }
+        return "DOUBLE PRECISION";
+      case "boolean":
+        return "BOOLEAN";
+      default:
+        return yield* Effect.fail(
+          new UnsupportedJSTypePostgresConversionError({
+            cause: null,
+            message: `Unsupported type for value provided in script result: ${typeof value}`,
+          }),
+        );
+    }
+  });
+
+export const postgresIdColumn = (type?: PgType<unknown>) => {
+  const idType =
+    type?.getPostgresType() || "BIGINT GENERATED ALWAYS AS IDENTITY";
+  return `id ${idType} PRIMARY KEY` as const;
 };

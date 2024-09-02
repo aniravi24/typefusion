@@ -50,6 +50,11 @@ export class ModuleExecutionError extends Data.TaggedError(
   message: string;
 }> {}
 
+/**
+ * Runs a module and inserts the result into the database.
+ * @param leaf - The relative path of the module to run.
+ * @returns void
+ */
 export function runModule(leaf: string) {
   return Effect.gen(function* () {
     const path = `../${leaf}`;

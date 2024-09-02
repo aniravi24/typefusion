@@ -19,6 +19,13 @@ export interface TypefusionConfig {
   alwaysPrintExecutionGraph?: boolean;
 }
 
+/**
+ * The main entry point for Typefusion. This function will generate a dependency graph of the modules in the given directory,
+ * and then execute the modules in the order of their dependencies.
+ *
+ * @param config - The configuration for Typefusion, see {@link TypefusionConfig}.
+ * @returns An Effect that, when run, will execute the Typefusion script.
+ */
 export function typefusion(config: TypefusionConfig) {
   return Effect.gen(function* () {
     const fileSystem = yield* FileSystem.FileSystem;

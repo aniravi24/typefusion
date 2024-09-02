@@ -1,8 +1,17 @@
 import { Effect } from "effect";
-import { DatabaseGetError, dbSelect, TypefusionScriptResult } from "./store.js";
+import {
+  DatabaseSelectError,
+  dbSelect,
+  TypefusionScriptResult,
+} from "./store.js";
 import { SqlLive } from "./db/postgres/client.js";
 import { ConfigError } from "effect/ConfigError";
 
+/**
+ * Get the data from a module (i.e. the result of one of your Typefusion scripts).
+ * @param module - The module to get the data from.
+ * @returns The data from the associated table for that module.
+ */
 export const typefusionRef = async <
   T extends (...args: any[]) => PromiseLike<TypefusionScriptResult>,
 >(
@@ -26,6 +35,9 @@ export const typefusionRef = async <
   ) as any;
 };
 
+/**
+ * Analogous to {@link typefusionRef} but for use in Effect.
+ */
 export const typefusionRefEffect = <
   T extends (...args: any[]) => PromiseLike<TypefusionScriptResult>,
 >(
@@ -42,7 +54,7 @@ export const typefusionRefEffect = <
     : Awaited<ReturnType<T>>["data"] extends Array<infer U>
       ? U
       : never,
-  DatabaseGetError | ConfigError
+  DatabaseSelectError | ConfigError
 > => {
   return dbSelect(module).pipe(Effect.provide(SqlLive)) as any;
 };
@@ -61,6 +73,9 @@ export const typefusionRefTableName = async <
   return module.name;
 };
 
+/**
+ * Analogous to {@link typefusionRefTableName} but for use in Effect.
+ */
 export const typefusionRefTableNameEffect = <
   T extends (...args: any[]) => PromiseLike<TypefusionScriptResult>,
 >(

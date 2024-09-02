@@ -2,7 +2,13 @@ import { Schema } from "@effect/schema";
 import { Effect, Data } from "effect";
 import { TypefusionModule, TypefusionModuleDefault } from "./types.js";
 import { SqlClient } from "@effect/sql";
-import { PgType } from "./db/postgres/types.js";
+import {
+  PgType,
+  postgresIdColumn,
+  valueToPostgresType,
+} from "./db/postgres/types.js";
+
+// TODO this file needs to be generalized so we can support other databases
 
 // For some reason when we dynamically import the PgType when executing scripts, somePgType instanceof PgType is false
 const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
@@ -11,6 +17,10 @@ const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
   }
   return false;
 });
+
+/**
+ * The schema for the return type of a Typefusion script.
+ */
 const ScriptResultSchema = Schema.Struct({
   types: Schema.Record({
     key: Schema.String,
@@ -21,10 +31,16 @@ const ScriptResultSchema = Schema.Struct({
   ),
 });
 
+/**
+ * The return type of a Typefusion script.
+ */
 export type TypefusionScriptResult = Schema.Schema.Type<
   typeof ScriptResultSchema
 >;
 
+/**
+ * The return type of a Typefusion script ({@link TypefusionScriptResult}) when the result contains only the 'data' field.
+ */
 export interface TypefusionResultDataOnly<
   DataElement extends Record<string, unknown>,
 > extends TypefusionScriptResult {
@@ -34,6 +50,9 @@ export interface TypefusionResultDataOnly<
   data: DataElement[];
 }
 
+/**
+ * The return type of a Typefusion script ({@link TypefusionScriptResult}) when the result contains both the 'types' and 'data' fields, and you want to use your existing {@link PgType} schema.
+ */
 export interface TypefusionPgResult<T extends Record<string, PgType<unknown>>>
   extends TypefusionScriptResult {
   types: T;
@@ -41,6 +60,21 @@ export interface TypefusionPgResult<T extends Record<string, PgType<unknown>>>
     [key in keyof T]: T[key] extends PgType<infer U> ? U : never;
   }[];
 }
+
+/**
+ * The return type of a Typefusion script ({@link TypefusionScriptResult}) when the result contains both the 'types' and 'data' fields, and you want to use your existing {@link PgType} schema.
+ * However, the data is unknown, so you can pass in any data array and it will type check.
+ */
+export interface TypefusionPgResultDataUnknown<
+  T extends Record<string, PgType<unknown>>,
+> extends TypefusionScriptResult {
+  types: T;
+  data: Record<any, any>[];
+}
+/**
+ * The return type of a Typefusion script ({@link TypefusionScriptResult}) when the result contains both the 'types' and 'data' fields.
+ * This will check that your `pgType` schema matches the data you are returning, but it's more verbose than using {@link TypefusionPgResult}.
+ */
 
 export interface TypefusionResult<DataElement extends Record<string, unknown>>
   extends TypefusionScriptResult {
@@ -50,60 +84,12 @@ export interface TypefusionResult<DataElement extends Record<string, unknown>>
   data: DataElement[];
 }
 
+/**
+ * The return type of a Typefusion script ({@link TypefusionScriptResult}) when the result contains potentially only the 'data' field.
+ * However, the data is unknown, so you can pass in any data array and it will type check.
+ */
 export interface TypefusionResultUnknown
   extends TypefusionResult<Record<string, unknown>> {}
-
-export class UnsupportedTypeError extends Data.TaggedError(
-  "UnsupportedTypeError",
-)<{
-  cause: unknown;
-  message: string;
-}> {}
-
-// People shouldn't really use this function, it's only useful for the simplest of types
-const valueToPostgresType = (value: unknown) =>
-  Effect.gen(function* () {
-    if (value === null || value === undefined) {
-      return "TEXT";
-    }
-    if (value instanceof Date) {
-      return "TIMESTAMP WITH TIME ZONE";
-    }
-    if (typeof value === "object") {
-      return "JSONB";
-    }
-    if (typeof value === "string") {
-      return "TEXT";
-    }
-    if (typeof value === "number") {
-      if (Number.isInteger(value)) {
-        // PostgreSQL INTEGER range: -2,147,483,648 to +2,147,483,647
-        const MIN_INTEGER = -2147483648;
-        const MAX_INTEGER = 2147483647;
-        if (value >= MIN_INTEGER && value <= MAX_INTEGER) {
-          return "INTEGER";
-        }
-        return "BIGINT";
-      }
-      return "DOUBLE PRECISION";
-    }
-    if (typeof value === "boolean") {
-      return "BOOLEAN";
-    }
-
-    return yield* Effect.fail(
-      new UnsupportedTypeError({
-        cause: null,
-        message: `Unsupported type for value provided in script result: ${typeof value}`,
-      }),
-    );
-  });
-
-const idColumn = (type?: PgType<unknown>) => {
-  const idType =
-    type?.getPostgresType() || "BIGINT GENERATED ALWAYS AS IDENTITY";
-  return `id ${idType} PRIMARY KEY`;
-};
 
 export class ConvertDataToSQLDDLError extends Data.TaggedError(
   "ConvertDataToSQLDDLError",
@@ -113,7 +99,7 @@ export class ConvertDataToSQLDDLError extends Data.TaggedError(
 }> {}
 
 // TODO support multiple casings? (camelCase, snake_case)
-const convertDataToSQLDDL = (
+const convertTypefusionScriptResultToSQLDDL = (
   module: TypefusionModule,
   result: TypefusionScriptResult,
 ) =>
@@ -135,7 +121,7 @@ const convertDataToSQLDDL = (
         Object.entries(result.data[0]),
         ([key, value]) =>
           Effect.if(key === "id", {
-            onTrue: () => Effect.succeed(idColumn()),
+            onTrue: () => Effect.succeed(postgresIdColumn()),
             onFalse: () =>
               Effect.map(
                 valueToPostgresType(value),
@@ -149,7 +135,7 @@ const convertDataToSQLDDL = (
     return Object.entries(result.types)
       .map(([key, value]) => {
         if (key === "id") {
-          return idColumn(value);
+          return postgresIdColumn(value);
         }
         return `"${key}" ${value}`;
       })
@@ -179,7 +165,7 @@ export const dbInsert = (module: TypefusionModule, result: unknown) =>
         ),
       );
 
-      const ddl = yield* convertDataToSQLDDL(module, result);
+      const ddl = yield* convertTypefusionScriptResultToSQLDDL(module, result);
 
       yield* sql`CREATE TABLE IF NOT EXISTS "${sql.unsafe(module.name)}" (
         ${sql.unsafe(ddl)}
@@ -214,7 +200,9 @@ export const dbInsert = (module: TypefusionModule, result: unknown) =>
     }
   });
 
-export class DatabaseGetError extends Data.TaggedError("DatabaseGetError")<{
+export class DatabaseSelectError extends Data.TaggedError(
+  "DatabaseSelectError",
+)<{
   cause: unknown;
   message: string;
 }> {}
@@ -225,7 +213,7 @@ export const dbSelect = (module: TypefusionModuleDefault) =>
     return yield* sql`SELECT * FROM "${sql.unsafe(module.name)}"`.pipe(
       Effect.mapError(
         (error) =>
-          new DatabaseGetError({
+          new DatabaseSelectError({
             cause: error,
             message: `Error fetching data from ${module.name}`,
           }),

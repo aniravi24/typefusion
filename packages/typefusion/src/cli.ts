@@ -30,7 +30,7 @@ const command = Command.make(
 
 const cli = Command.run(command, {
   name: "Typefusion CLI",
-  version: "v0.0.1",
+  version: "IGNORE_VERSION_OUTPUT_HERE_CHECK_YOUR_PACKAGE_JSON",
 });
 
 Effect.suspend(() => cli(process.argv)).pipe(

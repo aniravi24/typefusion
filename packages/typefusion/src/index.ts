@@ -1,5 +1,8 @@
 import { Effect } from "effect";
-import { typefusion, TypefusionConfig } from "./typefusion.js";
+import {
+  typefusion as typefusionEffect,
+  TypefusionConfig,
+} from "./typefusion.js";
 
 export {
   DependencyGraphGenerationError,
@@ -8,20 +11,23 @@ export {
 
 export { typefusionRef, typefusionRefTableName } from "./lib.js";
 
+export { UnsupportedJSTypePostgresConversionError } from "./db/postgres/types.js";
+
 export {
   TypefusionPgResult,
   TypefusionResult,
   TypefusionResultDataOnly,
   TypefusionResultUnknown,
   ConvertDataToSQLDDLError,
-  DatabaseGetError,
+  DatabaseSelectError,
   DatabaseInsertError,
-  UnsupportedTypeError,
 } from "./store.js";
 
 export { ModuleExecutionError, ModuleImportError } from "./helpers.js";
 
 export * from "./db/postgres/types.js";
 
-export default (config: TypefusionConfig) =>
-  typefusion(config).pipe(Effect.runPromise);
+export const typefusion = (config: TypefusionConfig) =>
+  typefusionEffect(config).pipe(Effect.runPromise);
+
+export default typefusion;
