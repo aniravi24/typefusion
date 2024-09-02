@@ -1,0 +1,5 @@
+---
+"typefusion": patch
+---
+
+ESM only

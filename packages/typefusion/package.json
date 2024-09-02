@@ -25,17 +25,10 @@
     "typefusion": "./dist/cli.js"
   },
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./effect": {
-      "import": "./dist/effect.js",
-      "require": "./dist/effect.cjs"
-    }
+    ".": "./dist/index.js",
+    "./effect": "./dist/effect.js"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
