@@ -7,51 +7,60 @@
 - [Welcome to Typefusion!](#welcome-to-typefusion)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
+  - [Key Features](#key-features)
   - [Getting Started](#getting-started)
   - [Usage](#usage)
     - [CLI](#cli)
     - [Library](#library)
   - [Typefusion Ref](#typefusion-ref)
   - [Examples](#examples)
-  - [Docs](#docs)
-  - [Effect](#effect)
-  - [Have an issue?](#have-an-issue)
-  - [Contributions](#contributions)
+  - [Documentation](#documentation)
+  - [Effect Integration](#effect-integration)
+  - [Troubleshooting](#troubleshooting)
+  - [Contributing](#contributing)
 
 ## Introduction
 
-Typefusion lets you run TypeScript scripts, and the results are materialized into a database (currently PostgreSQL only). Scripts can reference each other's results, so you can build complex workflows. It's inspired by [Data Build Tool](https://www.getdbt.com/) (DBT).
+Typefusion is a powerful tool that allows you to run TypeScript scripts and materialize the results into a database (currently PostgreSQL only). It enables you to create complex workflows by allowing scripts to reference each other's results. Inspired by [Data Build Tool (DBT)](https://www.getdbt.com/), Typefusion brings similar concepts to the TypeScript ecosystem, providing a solution for data transformation and workflow management.
+
+## Key Features
+
+- Execute TypeScript scripts and store results in PostgreSQL
+- Create complex workflows with script dependencies
+- Type-safe references between scripts
+- Flexible usage through CLI and library modes
+- Automatic dependency resolution and execution order
 
 ## Getting Started
 
-To get started with Typefusion, you need to install the package and set up your database configuration. Follow the steps below:
+To begin using Typefusion, follow these steps:
 
 1. Install Typefusion using your preferred package manager:
 
    ```sh
    npm install typefusion
-   ```
-
-   ```sh
+   # or
    pnpm install typefusion
-   ```
-
-   ```sh
+   # or
    yarn add typefusion
-   ```
-
-   ```sh
+   # or
    bun add typefusion
    ```
 
-2. To setup your database configuration, you can may do one of two options:
+2. Configure your database connection using one of these methods:
 
-   - Have a full connection string in the `DATABASE_URL` environment variable.
-   - Have `PGDATABASE`, `PGHOST`, `PGPORT`, `PGPASSWORD`, and `PGUSER` set as environment variables.
+   - Set a full connection string in the `DATABASE_URL` environment variable.
+   - Set individual environment variables: `PGDATABASE`, `PGHOST`, `PGPORT`, `PGPASSWORD`, and `PGUSER`.
+
+3. Create a directory for your scripts (e.g., `workflows`).
+
+4. Write your TypeScript scripts in the created directory.
+
+5. Compile your TypeScript scripts into your desired output directory. Typefusion runs on the compiled JavaScript output, so ensure you don't bundle your scripts to preserve the directory layout.
 
 ## Usage
 
-1. First, create a directory to store your scripts.
+1. First, create a directory to store your scripts, such as `workflows`.
 
 2. Then, create a script file in the directory, for example, `main.ts`:
 
@@ -85,35 +94,39 @@ To get started with Typefusion, you need to install the package and set up your 
    }
    ```
 
-   Then, you may either use the CLI or library to run your script.
+   Compile your scripts into your directory of choice. Typefusion runs on the JS output, not on the original typescript scripts. Make sure not to bundle your scripts so that the directory layout is preserved.
+
+   Typefusion can be used in two primary modes: CLI and library. Both modes offer similar functionality, allowing you to choose the most suitable approach for your project.
 
 ### CLI
 
-You can use the Typefusion CLI to run your scripts. Here is an example of how to run the CLI:
+The Typefusion CLI provides a convenient way to run your scripts from the command line. To use the CLI:
+
+1. Add a script to your `package.json`:
+
+   ```json
+   "scripts": {
+     "run-typefusion": "dotenv -- typefusion ./scripts"
+   }
+   ```
+
+   This example assumes you're using `dotenv` for environment variable management and that your compiled scripts are in the `./scripts` directory.
+
+2. Run your scripts:
+
+   ```sh
+   npm run run-typefusion
+   ```
+
+To explore all CLI options, run:
 
 ```sh
-npm run typefusion --help # The CLI mode has some nifty features, check them out!
+npm run typefusion --help
 ```
-
-A common setup in your package.json scripts (presuming you have dotenv setup with a `.env` file in your project):
-
-```json
-"scripts": {
-  "run-typefusion": "dotenv -- typefusion ./scripts"
-}
-```
-
-Then you can run your scripts with:
-
-```sh
-npm run run-typefusion
-```
-
-You should now see the output of your script in your database! There should be a table called `main` with the data you returned from the script above.
 
 ### Library
 
-You can also use Typefusion as a library in your TypeScript projects. Here is an example of how to use it:
+You can also use Typefusion as a library in your TypeScript projects:
 
 ```ts
 import typefusion from "typefusion";
@@ -123,9 +136,11 @@ await typefusion({
 });
 ```
 
+This approach allows for more programmatic control and integration with your existing TypeScript applications.
+
 ## Typefusion Ref
 
-Typefusion Refs allow you to reference the results of a script in another script. It is useful for building complex workflows. Following the usage of the library above, here is an example of how to use Typefusion Ref to reference the results of the `main` script:
+Typefusion Refs enable you to reference the results of one script in another, facilitating the creation of complex workflows. Here's an example:
 
 ```ts
 import { pgType, typefusionRef, TypefusionPgResult } from "typefusion";
@@ -151,41 +166,49 @@ export default async function typefusion_ref(): Promise<
 }
 ```
 
-You'll notice that the `main` script is run first, and then the `typefusion_ref` script is run. The result of the `main` script is then used in the `typefusion_ref` script. `result` is fully type-safe depending on the types you used in the `main` script.
-
-As long as there are no circular dependencies, you can reference any script from any other script, allowing for complex workflows.
-
-If you want to run a query of some kind and want to just grab the table name without getting the full data, you can use the `typefusionRefTableName` function. This is useful if you want to run a query of some kind and want to just grab the table name from the other script without the full data.
+For cases where you only need the table name without fetching the full data, use the `typefusionRefTableName` function:
 
 ```ts
 import { typefusionRefTableName } from "typefusion";
 import main from "./main.js";
 
 const tableName = await typefusionRefTableName(main);
-console.log("typefusion ref table name", tableName); // should print out "main"
+console.log("typefusion ref table name", tableName); // Outputs: "main"
 ```
 
 ## Examples
 
-Here are some examples of how to use Typefusion:
+To help you get started, we've provided several examples:
 
-1. [Main Example](packages/typefusion/example/main.ts)
-2. [Ref Example](packages/typefusion/example/options/typefusion_pg_result.ts)
+1. [Basic Usage](packages/typefusion/example/main.ts)
+2. [Using Typefusion Ref](packages/typefusion/example/options/typefusion_pg_result.ts)
 
-You can find the remaining examples [here](packages/typefusion/example).
+Find more examples in the [examples directory](packages/typefusion/example).
 
-## Docs
+## Documentation
 
-Reference docs can be found at [https://aniravi24.github.io/typefusion](https://aniravi24.github.io/typefusion). JSDoc comments are used to document more details not covered in this README.
+For detailed API documentation, visit the [reference docs](https://aniravi24.github.io/typefusion). The documentation is generated from JSDoc comments in the source code, providing comprehensive information on usage and features.
 
-## Effect
+## Effect Integration
 
-This library was built with [Effect](https://effect.website). Typefusion has some support for Effect, which you can find in the reference docs (anything suffixed with `Effect`).
+Typefusion is built with [Effect](https://effect.website). Refer to the reference docs for details on Effect-suffixed functions and their usage.
 
-## Have an issue?
+## Troubleshooting
 
-Open a GitHub issue [here](https://github.com/aniravi24/typefusion/issues/new)
+If you encounter any issues while using Typefusion:
 
-## Contributions
+1. Check the [GitHub Issues](https://github.com/aniravi24/typefusion/issues) to see if your problem has been reported or resolved.
+2. Ensure you're using the latest version of Typefusion.
+3. Verify your database connection settings and environment variables.
+4. If the issue persists, please [open a new issue](https://github.com/aniravi24/typefusion/issues/new).
 
-Please open an issue to document a bug or suggest a feature request before opening a PR.
+## Contributing
+
+We welcome contributions to Typefusion! To contribute:
+
+1. Fork the repository and create your branch from `main`.
+2. If you've added code that should be tested, add tests.
+3. Ensure your code passes all tests and linting rules.
+4. Open a pull request with the provided template.
+
+If it's a larger change, please open an issue to discuss your proposed changes or feature additions.
