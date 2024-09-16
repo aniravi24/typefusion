@@ -30,7 +30,7 @@
     "@typescript-eslint/parser": "7.18.0",
     "commitizen": "4.3.0",
     "cz-git": "1.9.4",
-    "eslint": "8.57.0",
+    "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.30.0",
     "eslint-plugin-simple-import-sort": "12.1.1",
@@ -40,7 +40,7 @@
     "prettier": "3.3.3",
     "prettier-plugin-sort-json": "4.0.0",
     "tsup": "8.2.4",
-    "turbo": "2.1.1",
+    "turbo": "2.1.2",
     "typedoc": "0.26.7",
     "typedoc-github-theme": "0.1.2",
     "typescript": "5.5.4"
