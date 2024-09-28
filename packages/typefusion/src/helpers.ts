@@ -1,6 +1,13 @@
 import { Data, Effect, LogLevel } from "effect";
 import { SkottNode } from "skott/graph/node";
 import { dbInsert } from "./store.js";
+import { PgLiveEffect } from "./db/postgres/client.js";
+import { MySqlLiveEffect } from "./db/mysql/client.js";
+import {
+  MySqlDatabaseHelperService,
+  PgDatabaseHelperService,
+} from "./db/common/layer.js";
+import { TypefusionScriptExport } from "./types.js";
 
 /**
  * Traverses a dependency graph and returns an array of execution levels.
@@ -51,31 +58,50 @@ export class ModuleExecutionError extends Data.TaggedError(
 }> {}
 
 /**
- * Runs a module and inserts the result into the database.
+ * Runs a typefusion script and inserts the result into the database.
  * @param leaf - The relative path of the module to run.
  * @returns void
  */
-export function runModule(leaf: string) {
+
+export function runTypefusionScript(leaf: string) {
   return Effect.gen(function* () {
     const path = `../${leaf}`;
+    console.log("RUN TYPEFUSION SCRIPT", path);
 
     const moduleDefault = yield* Effect.tryPromise({
-      try: async () => import(path).then((module) => module.default),
+      try: async () =>
+        import(path).then((module) => module.default as TypefusionScriptExport),
       catch: (error) =>
         new ModuleImportError({
           cause: error,
           message: `Error importing module '${leaf}' using path '${path}'`,
         }),
     });
+
     const result = yield* Effect.tryPromise({
-      try: async () => moduleDefault(),
+      try: async () => moduleDefault.run(),
       catch: (error) =>
         new ModuleExecutionError({
           cause: error,
           message: `Error executing module '${leaf}'`,
         }),
     });
-    return yield* dbInsert(moduleDefault, result);
+    console.log(moduleDefault.name);
+
+    if (moduleDefault.resultDatabase === "postgresql") {
+      return yield* dbInsert(moduleDefault, result)
+        .pipe(PgLiveEffect)
+        .pipe(PgDatabaseHelperService);
+    }
+    if (moduleDefault.resultDatabase === "mysql") {
+      return yield* dbInsert(moduleDefault, result)
+        .pipe(MySqlLiveEffect)
+        .pipe(MySqlDatabaseHelperService);
+    } else {
+      return yield* Effect.dieMessage(
+        `Database ${moduleDefault.resultDatabase} not supported, make sure the 'resultDatabase' property is set in your typefusion script default export.`,
+      );
+    }
   });
 }
 

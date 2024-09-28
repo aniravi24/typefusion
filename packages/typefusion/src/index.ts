@@ -11,10 +11,10 @@ export {
 
 export { typefusionRef, typefusionRefTableName } from "./lib.js";
 
-export { UnsupportedJSTypePostgresConversionError } from "./db/postgres/types.js";
+export { UnsupportedJSTypeDbConversionError } from "./db/common/service.js";
 
 export {
-  TypefusionPgResult,
+  TypefusionDbResult as TypefusionDbResult,
   TypefusionResult,
   TypefusionResultDataOnly,
   TypefusionResultUnknown,
@@ -26,6 +26,8 @@ export {
 export { ModuleExecutionError, ModuleImportError } from "./helpers.js";
 
 export * from "./db/postgres/types.js";
+
+export * from "./db/mysql/types.js";
 
 export const typefusion = (config: TypefusionConfig) =>
   typefusionEffect(config).pipe(Effect.runPromise);

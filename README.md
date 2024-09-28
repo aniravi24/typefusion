@@ -23,11 +23,11 @@
 
 ## Introduction
 
-Typefusion allows you to run TypeScript scripts and materialize the results into a database (currently PostgreSQL only). It enables you to create complex workflows by allowing scripts to reference each other's results. Inspired by [Data Build Tool (DBT)](https://www.getdbt.com/).
+Typefusion allows you to run TypeScript scripts and materialize the results into a database. It enables you to create complex workflows by allowing scripts to reference each other's results. Inspired by [Data Build Tool (DBT)](https://www.getdbt.com/).
 
 ## Key Features
 
-- Execute TypeScript scripts and store results in PostgreSQL
+- Execute TypeScript scripts and store results in your database
 - Create complex workflows with script dependencies
 - Type-safe references between scripts
 - Flexible usage through CLI and library modes
@@ -49,10 +49,10 @@ To begin using Typefusion, follow these steps:
    bun add typefusion
    ```
 
-2. Configure your database connection using one of these methods:
+2. Configure your database connection using one of these methods (PostgreSQL and MySQL are supported):
 
-   - Set a full connection string in the `PG_DATABASE_URL` environment variable.
-   - Set individual environment variables: `PGDATABASE`, `PGHOST`, `PGPORT`, `PGPASSWORD`, and `PGUSER`.
+   - Set a full connection string in the `PG_DATABASE_URL` or `MYSQL_DATABASE_URL` environment variable.
+   - Set individual environment variables: `PG_DATABASE`, `PG_HOST`, `PG_PORT`, `PG_PASSWORD`, and `PG_USER` (for postgres) or `MYSQL_DATABASE`, `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_PASSWORD`, and `MYSQL_USER` (for mysql).
 
 3. Create a directory for your scripts (e.g., `workflows`).
 
@@ -65,9 +65,10 @@ To begin using Typefusion, follow these steps:
 After following the above instructions, create a script file in the directory, for example, `main.ts`:
 
 ```ts
-import { pgType, TypefusionPgResult } from "typefusion";
+// or mySqlType for mysql
+import { pgType, typefusionRef, TypefusionDbResult } from "typefusion";
 
-export const mainSchema = {
+const mainSchema = {
   id: pgType.integer().notNull(),
   name: pgType.text().notNull(),
   age: pgType.integer().notNull(),
@@ -75,13 +76,13 @@ export const mainSchema = {
   address: pgType.text().notNull(),
 };
 
-export default async function main(): Promise<
-  TypefusionPgResult<typeof mainSchema>
-> {
-  console.log("running main");
-  return {
-    types: mainSchema,
-    data: [
+export default {
+  name: "main",
+  schema: mainSchema,
+  resultDatabase: "postgresql",
+  run: async () => {
+    console.log("running main");
+    return [
       {
         id: 1,
         name: "John Doe",
@@ -89,9 +90,9 @@ export default async function main(): Promise<
         email: "john.doe@example.com",
         address: "123 Main St",
       },
-    ],
-  };
-}
+    ];
+  },
+} satisfies TypefusionDbResult<typeof mainSchema>;
 ```
 
 **Warning:** Typefusion is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and does not provide a CommonJS export.
@@ -143,27 +144,28 @@ This approach allows for more programmatic control and integration with your exi
 Typefusion Refs enable you to reference the results of one script in another, facilitating the creation of complex workflows. Here's an example:
 
 ```ts
-import { pgType, typefusionRef, TypefusionPgResult } from "typefusion";
+// or mySqlType for mysql
+import { pgType, typefusionRef, TypefusionDbResult } from "typefusion";
 import main from "./main.js";
 
 const smallSchema = {
   small: pgType.text().notNull(),
 };
 
-export default async function typefusion_ref(): Promise<
-  TypefusionPgResult<typeof smallSchema>
-> {
-  const result = await typefusionRef(main);
-  console.log("typefusion ref main result", result);
-  return {
-    types: smallSchema,
-    data: [
+export default {
+  name: "typefusion_ref",
+  schema: smallSchema,
+  resultDatabase: "postgresql",
+  run: async () => {
+    const result = await typefusionRef(main);
+    console.log("typefusion ref main result", result);
+    return [
       {
         small: "smallString" as const,
       },
-    ],
-  };
-}
+    ];
+  },
+} satisfies TypefusionDbResult<typeof smallSchema>;
 ```
 
 For cases where you only need the table name without fetching the full data, use the `typefusionRefTableName` function:

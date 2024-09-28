@@ -1,4 +1,4 @@
-import { pgType, TypefusionPgResult } from "../../src/index.js";
+import { pgType, TypefusionDbResult } from "../../src/index.js";
 
 const allPgTypes = {
   text: pgType.text().notNull(),
@@ -38,13 +38,13 @@ const allPgTypes = {
   bytea: pgType.bytea().notNull(),
 };
 
-export default async function typefusion_all_pg_types(): Promise<
-  TypefusionPgResult<typeof allPgTypes>
-> {
-  console.log("TYPEFUSION ALL PG TYPES IS RUN");
-  return {
-    types: allPgTypes,
-    data: [
+export default {
+  name: "typefusion_all_pg_types",
+  schema: allPgTypes,
+  resultDatabase: "postgresql",
+  run: async () => {
+    console.log("TYPEFUSION ALL PG TYPES IS RUN");
+    return [
       {
         text: "Sample text",
         integer: 42,
@@ -82,6 +82,6 @@ export default async function typefusion_all_pg_types(): Promise<
         xml: "<root><element>content</element></root>",
         bytea: new Uint8Array([0x12, 0x34, 0x56, 0x78]),
       },
-    ],
-  };
-}
+    ];
+  },
+} satisfies TypefusionDbResult<typeof allPgTypes>;
