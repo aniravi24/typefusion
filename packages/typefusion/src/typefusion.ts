@@ -2,8 +2,11 @@ import { Data, Effect } from "effect";
 import { FileSystem } from "@effect/platform";
 import { NodeFileSystem } from "@effect/platform-node";
 import skott from "skott";
-import { traverseGraph, printExecutionGraph, runModule } from "./helpers.js";
-import { SqlLive } from "./db/postgres/client.js";
+import {
+  traverseGraph,
+  printExecutionGraph,
+  runTypefusionScript,
+} from "./helpers.js";
 
 export const DependencyGraphGenerationError = Data.TaggedError(
   "DependencyGraphGenerationError",
@@ -27,8 +30,8 @@ export interface TypefusionConfig {
  * @param config - The configuration for Typefusion, see {@link TypefusionConfig}.
  * @returns An Effect that, when run, will execute the Typefusion script.
  */
-export function typefusion(config: TypefusionConfig) {
-  return Effect.gen(function* () {
+export const typefusion = (config: TypefusionConfig) =>
+  Effect.gen(function* () {
     if (config.dryRun) {
       yield* Effect.log("Dry run enabled. No changes will be made.");
     }
@@ -76,12 +79,11 @@ export function typefusion(config: TypefusionConfig) {
 
     if (!config.dryRun) {
       for (const level of executionLevels) {
-        yield* Effect.forEach(level, (file) => runModule(file), {
+        yield* Effect.forEach(level, (file) => runTypefusionScript(file), {
           concurrency: "inherit",
         });
       }
     }
 
     return executionLevels;
-  }).pipe(Effect.provide(SqlLive), Effect.provide(NodeFileSystem.layer));
-}
+  }).pipe(Effect.provide(NodeFileSystem.layer));

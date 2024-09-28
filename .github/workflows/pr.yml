@@ -15,10 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Start setting up postgres container"
+      - name: "Start setting up database containers"
         run: |
-          # start preparing the postgres container, if you run tests too soon, it will fail
-          docker run -d -p 5432:5432 -e POSTGRES_DB=typefusion -e POSTGRES_PASSWORD=password postgres:14-alpine
+          # start preparing the database containers, if you run tests before these start up, you may get an error
+          docker run -d -p 5432:5432 -e POSTGRES_DB=typefusion -e POSTGRES_PASSWORD=password postgres:alpine
+          docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=typefusion mysql:latest
 
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -39,6 +40,7 @@ jobs:
         run: pnpm build && pnpm turbo --env-mode=loose lint test-ci typecheck
         env:
           PG_DATABASE_URL: postgres://postgres:password@localhost:5432/typefusion?sslmode=disable
+          MYSQL_DATABASE_URL: mysql://root:password@localhost:3306/typefusion
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

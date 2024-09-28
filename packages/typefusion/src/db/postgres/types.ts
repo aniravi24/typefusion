@@ -1,6 +1,6 @@
-import { Data, Effect } from "effect";
-
-export type Nullable<T> = T | null;
+import { Effect } from "effect";
+import { DbType, Nullable } from "../common/types.js";
+import { UnsupportedJSTypeDbConversionError } from "../common/service.js";
 
 /**
  * This is a simple wrapper class to represent a Postgres type that will be used to define a table.
@@ -12,40 +12,21 @@ export type Nullable<T> = T | null;
  * const myCustomType = new PgType<Nullable<string>>("myCustomType");
  * ```
  */
-export class PgType<Type> extends Data.TaggedClass("PgType")<{
-  postgresType: string;
-}> {
-  private _nullable: boolean;
-  constructor(postgresType: string) {
-    super({ postgresType });
+export class PgType<Type> extends DbType<Type> {
+  public override _tag = "PgType";
+  constructor(dbType: string) {
+    super(dbType);
     this._nullable = true;
   }
 
-  notNull(): PgType<Exclude<Type, null>> {
+  override notNull(): PgType<Exclude<Type, null>> {
     this._nullable = false;
     return this as PgType<Exclude<Type, null>>;
   }
 
-  nullable(): PgType<Nullable<Type>> {
+  override nullable(): PgType<Nullable<Type>> {
     this._nullable = true;
     return this as PgType<Nullable<Type>>;
-  }
-
-  getNullable(): boolean {
-    return this._nullable;
-  }
-
-  getPostgresType(): string {
-    return this.postgresType;
-  }
-
-  // This is a bit of a hack to get the type of the underlying type
-  getType(): Type {
-    return undefined as Type;
-  }
-
-  override toString(): string {
-    return `${this.postgresType}${this._nullable ? " " : " NOT NULL"}`;
   }
 }
 
@@ -87,19 +68,14 @@ export const pgType = {
   bytea: () => new PgType<Nullable<Uint8Array>>("bytea"),
 };
 
-export class UnsupportedJSTypePostgresConversionError extends Data.TaggedError(
-  "UnsupportedJSTypePostgresConversionError",
-)<{
-  cause: unknown;
-  message: string;
-}> {}
-
 /**
  * @internal
  * @param value Any input
- * @returns A string representing the closest postgres type to that value. This function isn't meant to be used.
+ * @returns A string representing the closest postgres type to that value.
  */
-export const valueToPostgresType = (value: unknown) =>
+export const valueToPostgresType = (
+  value: unknown,
+): Effect.Effect<string, UnsupportedJSTypeDbConversionError, never> =>
   Effect.gen(function* () {
     if (value === null || value === undefined) {
       return "TEXT";
@@ -129,9 +105,9 @@ export const valueToPostgresType = (value: unknown) =>
         return "BOOLEAN";
       default:
         return yield* Effect.fail(
-          new UnsupportedJSTypePostgresConversionError({
+          new UnsupportedJSTypeDbConversionError({
             cause: null,
-            message: `Unsupported type for value provided in script result: ${typeof value}`,
+            message: `Unsupported JS type in postgres for provided value: ${typeof value}`,
           }),
         );
     }
@@ -143,7 +119,6 @@ export const valueToPostgresType = (value: unknown) =>
  * @returns a string representing the id column DDL
  */
 export const postgresIdColumn = (type?: PgType<unknown>) => {
-  const idType =
-    type?.getPostgresType() || "BIGINT GENERATED ALWAYS AS IDENTITY";
-  return `id ${idType} PRIMARY KEY` as const;
+  const idType = type?.getDbType() || "BIGINT GENERATED ALWAYS AS IDENTITY";
+  return `id ${idType} PRIMARY KEY`;
 };
