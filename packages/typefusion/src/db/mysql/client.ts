@@ -1,6 +1,7 @@
 // TODO
 import { MysqlClient } from "@effect/sql-mysql2";
-import { Config, Effect, Redacted } from "effect";
+import { Config, Effect, Layer, Redacted } from "effect";
+import { MySqlDatabaseHelperContext } from "../common/layer.js";
 
 /**
  * @internal
@@ -39,4 +40,6 @@ export const MySqlLive = MysqlClient.layer({
 /**
  * @internal
  */
-export const MySqlLiveEffect = Effect.provide(MySqlLive);
+export const MySqlLiveEffect = Effect.provide(
+  Layer.mergeAll(MySqlLive, Layer.succeedContext(MySqlDatabaseHelperContext)),
+);

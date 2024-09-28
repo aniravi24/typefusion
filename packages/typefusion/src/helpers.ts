@@ -3,10 +3,6 @@ import { SkottNode } from "skott/graph/node";
 import { dbInsert } from "./store.js";
 import { PgLiveEffect } from "./db/postgres/client.js";
 import { MySqlLiveEffect } from "./db/mysql/client.js";
-import {
-  MySqlDatabaseHelperService,
-  PgDatabaseHelperService,
-} from "./db/common/layer.js";
 import { TypefusionScriptExport } from "./types.js";
 
 /**
@@ -87,14 +83,10 @@ export function runTypefusionScript(leaf: string) {
     });
 
     if (moduleDefault.resultDatabase === "postgresql") {
-      return yield* dbInsert(moduleDefault, result)
-        .pipe(PgLiveEffect)
-        .pipe(PgDatabaseHelperService);
+      return yield* dbInsert(moduleDefault, result).pipe(PgLiveEffect);
     }
     if (moduleDefault.resultDatabase === "mysql") {
-      return yield* dbInsert(moduleDefault, result)
-        .pipe(MySqlLiveEffect)
-        .pipe(MySqlDatabaseHelperService);
+      return yield* dbInsert(moduleDefault, result).pipe(MySqlLiveEffect);
     } else {
       return yield* Effect.dieMessage(
         `Database ${moduleDefault.resultDatabase} not supported, make sure the 'resultDatabase' property is set in your typefusion script default export.`,

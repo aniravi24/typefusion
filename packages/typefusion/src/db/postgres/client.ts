@@ -1,6 +1,7 @@
 import { PgClient } from "@effect/sql-pg";
-import { Config, Effect, Redacted } from "effect";
+import { Config, Effect, Layer, Redacted } from "effect";
 import postgres from "postgres";
+import { PgDatabaseHelperContext } from "../common/layer.js";
 
 /**
  * @internal
@@ -37,4 +38,6 @@ export const PgLive = PgClient.layer({
 /**
  * @internal
  */
-export const PgLiveEffect = Effect.provide(PgLive);
+export const PgLiveEffect = Effect.provide(
+  Layer.mergeAll(PgLive, Layer.succeedContext(PgDatabaseHelperContext)),
+);

@@ -228,11 +228,11 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
         );
     } else {
       if (!resultIsValidSchema) {
-        yield* Effect.logError("Invalid script result: ", result);
+        yield* Effect.logError("Invalid script run result: ", result);
         yield* Effect.fail(
           new DatabaseInsertError({
             cause: null,
-            message: `Module '${module.name}' does not match expected schema, make sure your function returns an object with the following shape: ${ScriptResultSchema.toString()}`,
+            message: `Module '${module.name}' does not match expected schema, make sure your run function returns an object with the following shape: ${ScriptResultSchema.toString()}`,
           }),
         );
       }
@@ -246,7 +246,7 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
           new DatabaseInsertError({
             cause: null,
             // We are going to assume that people at least provided a name
-            message: `Module '${(module as TypefusionScriptExport).name}' does not match expected schema, make sure your function returns an object with the following shape: ${ScriptExportSchema.toString()}`,
+            message: `Module '${(module as TypefusionScriptExport).name}' does not match expected schema, make sure your script returns an object with the following shape: ${ScriptExportSchema.toString()}`,
           }),
         );
       }
