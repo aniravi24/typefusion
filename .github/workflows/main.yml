@@ -6,6 +6,12 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      generate_docs:
+        description: 'Generate and deploy docs'
+        required: true
+        default: false
+        type: boolean
 
 env:
   HUSKY: 0
@@ -41,12 +47,12 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Generate docs
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.changesets.outputs.published == 'true' || github.event.inputs.generate_docs == 'true'
         run: pnpm docgen
 
       - name: Deploy docs to gh-pages
-        if: steps.changesets.outputs.published == 'true'
-        uses: JamesIves/github-pages-deploy-action@v4
+        if: steps.changesets.outputs.published == 'true' || github.event.inputs.generate_docs == 'true'
+        uses: JamesIves/github-pages-deploy-action@v4.6.4
         with:
           branch: gh-pages
           folder: docs
