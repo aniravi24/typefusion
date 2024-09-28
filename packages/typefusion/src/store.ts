@@ -7,8 +7,6 @@ import { MySqlType } from "./db/mysql/types.js";
 import { DbType } from "./db/common/types.js";
 import { DatabaseHelper } from "./db/common/service.js";
 
-// TODO this file needs to be generalized so we can support other databases
-
 // For some reason when we dynamically import the PgType when executing scripts, somePgType instanceof PgType is false
 const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
   if (typeof input === "object" && input !== null) {
@@ -28,10 +26,7 @@ const MySqlTypeSchema = Schema.declare(
 
 const ScriptExportSchema = Schema.Struct({
   name: Schema.String,
-  resultDatabase: Schema.Union(
-    Schema.Literal("postgresql"),
-    Schema.Literal("mysql"),
-  ),
+  resultDatabase: Schema.Literal("postgresql", "mysql"),
   schema: Schema.Union(
     Schema.Record({
       key: Schema.String,
@@ -57,7 +52,7 @@ const ScriptResultSchema = Schema.Array(
 );
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains only the 'data' field.
+ * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains the data without any schema.
  */
 export interface TypefusionResultDataOnly<
   DataElement extends Record<string, unknown>,
@@ -69,7 +64,7 @@ export interface TypefusionResultDataOnly<
 }
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'types' and 'data' fields
+ * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'schema' and return data
  * you want to use your existing {@link PgType} or {@link MySqlType} schema.
  */
 export interface TypefusionDbResult<T extends Record<string, DbType<unknown>>>
@@ -83,7 +78,7 @@ export interface TypefusionDbResult<T extends Record<string, DbType<unknown>>>
 }
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'types' and 'data' fields
+ * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'schema' and return data
  * you want to use your existing {@link PgType} or {@link MySqlType} schema.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
@@ -94,7 +89,7 @@ export interface TypefusionDbResultDataUnknown<
   run: () => PromiseLike<Record<any, any>[]>;
 }
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'types' and 'data' fields.
+ * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'schema' and return data.
  * This will check that your `pgType` schema matches the data you are returning, but it's more verbose than using {@link TypefusionDbResult}.
  */
 
@@ -107,7 +102,7 @@ export interface TypefusionResult<DataElement extends Record<string, unknown>>
 }
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains potentially only the 'data' field.
+ * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains potentially only the return data.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
 export interface TypefusionResultUnknown
@@ -120,7 +115,6 @@ export class ConvertDataToSQLDDLError extends Data.TaggedError(
   message: string;
 }> {}
 
-// TODO support multiple casings? (camelCase, snake_case)
 const convertTypefusionScriptResultToSQLDDL = (
   module: TypefusionScriptExport,
   result: Schema.Schema.Type<typeof ScriptResultSchema>,

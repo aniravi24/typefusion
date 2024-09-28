@@ -1,4 +1,3 @@
-// TODO
 import { MysqlClient } from "@effect/sql-mysql2";
 import { Config, Effect, Layer, Redacted } from "effect";
 import { MySqlDatabaseHelperContext } from "../common/layer.js";
