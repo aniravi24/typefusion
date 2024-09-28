@@ -14,7 +14,7 @@ export { typefusionRef, typefusionRefTableName } from "./lib.js";
 export { UnsupportedJSTypeDbConversionError } from "./db/common/service.js";
 
 export {
-  TypefusionDbResult as TypefusionDbResult,
+  TypefusionDbResult,
   TypefusionResult,
   TypefusionResultDataOnly,
   TypefusionResultUnknown,
@@ -28,6 +28,11 @@ export { ModuleExecutionError, ModuleImportError } from "./helpers.js";
 export * from "./db/postgres/types.js";
 
 export * from "./db/mysql/types.js";
+
+export {
+  TypefusionSupportedDatabases,
+  TypefusionScriptExport,
+} from "./types.js";
 
 export const typefusion = (config: TypefusionConfig) =>
   typefusionEffect(config).pipe(Effect.runPromise);
