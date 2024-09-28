@@ -40,7 +40,7 @@ export default {
         varchar: "Variable length text",
         time: "12:34:56",
         json: { key: "value" },
-        binary: new Uint8Array([0x12, 0x34, 0x56, 0x78]),
+        binary: new Uint8Array([0x12]),
       },
     ];
   },

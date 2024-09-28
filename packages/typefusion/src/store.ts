@@ -127,6 +127,7 @@ const convertTypefusionScriptResultToSQLDDL = (
 ) =>
   Effect.gen(function* () {
     const dbHelper = yield* DatabaseHelper;
+    // If no database types are provided, we will infer them from the result data
     if (!module.schema || Object.keys(module.schema).length === 0) {
       if (result.length === 0) {
         yield* Effect.fail(
@@ -146,9 +147,8 @@ const convertTypefusionScriptResultToSQLDDL = (
           Effect.if(key === "id", {
             onTrue: () => Effect.succeed(dbHelper.idColumn()),
             onFalse: () =>
-              Effect.map(
-                dbHelper.valueToDbType(value),
-                (dbType) => `"${key}" ${dbType}`,
+              Effect.map(dbHelper.valueToDbType(value), (dbType) =>
+                dbHelper.columnDDL(key, dbType),
               ),
           }),
         { concurrency: "inherit" },
@@ -160,7 +160,7 @@ const convertTypefusionScriptResultToSQLDDL = (
         if (key === "id") {
           return dbHelper.idColumn(value);
         }
-        return `"${key}" ${value}`;
+        return dbHelper.columnDDL(key, value.toString());
       })
       .join(", ");
   });
@@ -179,8 +179,9 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
 
     if (resultIsValidSchema && moduleIsValidSchema) {
       const sql = yield* SqlClient.SqlClient;
+      const dbHelper = yield* DatabaseHelper;
 
-      yield* sql`DROP TABLE IF EXISTS "${sql.unsafe(module.name)}"`.pipe(
+      yield* dbHelper.dropTableIfExists(sql, module.name).pipe(
         Effect.mapError(
           (error) =>
             new DatabaseInsertError({
@@ -197,28 +198,34 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
 
       yield* Effect.logDebug("columnDefinitions\n", columnDefinitions);
 
-      yield* sql`CREATE TABLE IF NOT EXISTS "${sql.unsafe(module.name)}" (
-        ${sql.unsafe(columnDefinitions)}
-      )`.pipe(
-        Effect.mapError(
-          (error) =>
-            new DatabaseInsertError({
-              cause: error,
-              message: `Error creating table '${module.name}'`,
-            }),
-        ),
-      );
+      yield* dbHelper
+        .createTableIfNotExists(sql, module.name, columnDefinitions)
+        .pipe(
+          Effect.mapError(
+            (error) =>
+              new DatabaseInsertError({
+                cause: error,
+                message: `Error creating table '${module.name}'`,
+              }),
+          ),
+        );
 
       // Note: We cast here because we are going to avoid validating each value in the result as the proper type, we'll let the database fail if the types are incorrect
-      yield* sql`INSERT INTO "${sql.unsafe(module.name)}" ${sql.insert(result as Parameters<typeof sql.insert>[0][])}`.pipe(
-        Effect.mapError(
-          (error) =>
-            new DatabaseInsertError({
-              cause: error,
-              message: `Error inserting data into '${module.name}'`,
-            }),
-        ),
-      );
+      yield* dbHelper
+        .insertIntoTable(
+          sql,
+          module.name,
+          result as Parameters<typeof sql.insert>[0][],
+        )
+        .pipe(
+          Effect.mapError(
+            (error) =>
+              new DatabaseInsertError({
+                cause: error,
+                message: `Error inserting data into '${module.name}'`,
+              }),
+          ),
+        );
     } else {
       if (!resultIsValidSchema) {
         yield* Effect.logError("Invalid script result: ", result);
@@ -256,7 +263,8 @@ export class DatabaseSelectError extends Data.TaggedError(
 export const dbSelect = (module: TypefusionScriptExport) =>
   Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
-    return yield* sql`SELECT * FROM "${sql.unsafe(module.name)}"`.pipe(
+    const dbHelper = yield* DatabaseHelper;
+    return yield* dbHelper.selectAllFromTable(sql, module.name).pipe(
       Effect.mapError(
         (error) =>
           new DatabaseSelectError({

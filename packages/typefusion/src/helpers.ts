@@ -66,7 +66,6 @@ export class ModuleExecutionError extends Data.TaggedError(
 export function runTypefusionScript(leaf: string) {
   return Effect.gen(function* () {
     const path = `../${leaf}`;
-    console.log("RUN TYPEFUSION SCRIPT", path);
 
     const moduleDefault = yield* Effect.tryPromise({
       try: async () =>
@@ -86,7 +85,6 @@ export function runTypefusionScript(leaf: string) {
           message: `Error executing module '${leaf}'`,
         }),
     });
-    console.log(moduleDefault.name);
 
     if (moduleDefault.resultDatabase === "postgresql") {
       return yield* dbInsert(moduleDefault, result)

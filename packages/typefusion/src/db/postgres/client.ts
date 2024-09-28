@@ -31,6 +31,7 @@ export const PgLive = PgClient.layer({
   types: Config.succeed({
     bigint: postgres.BigInt,
   }),
+  onnotice: Config.succeed(() => {}),
 });
 
 /**
