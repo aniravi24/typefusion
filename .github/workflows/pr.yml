@@ -19,7 +19,7 @@ jobs:
         run: |
           # start preparing the postgres container, if you run tests too soon, it will fail
           docker run -d -p 5432:5432 -e POSTGRES_DB=typefusion -e POSTGRES_PASSWORD=password postgres:alpine
-          docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=typefusion mysql:alpine
+          docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=typefusion mysql:latest
 
       - name: Checkout repo
         uses: actions/checkout@v4
