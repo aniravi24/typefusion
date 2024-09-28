@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.6
+
+### Patch Changes
+
+- [#16](https://github.com/aniravi24/typefusion/pull/16) [`7a24bb5`](https://github.com/aniravi24/typefusion/commit/7a24bb53af8cda4ce81bbdfea853c34d7fd768a4) Thanks [@aniravi24](https://github.com/aniravi24)! - Support multiple databases and change script configuration
+
 ## 0.0.5
 
 ### Patch Changes
