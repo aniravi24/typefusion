@@ -1,6 +1,6 @@
 import {
   typefusionRef,
-  TypefusionDbResult,
+  TypefusionDbScript,
   mySqlType,
 } from "../../src/index.js";
 import main from "../main.js";
@@ -16,10 +16,12 @@ export default {
   run: async () => {
     const result = await typefusionRef(main);
     console.log("TYPEFUSION PG RESULT IS RUN", result);
-    return [
-      {
-        small: "smallString" as const,
-      },
-    ];
+    return {
+      data: [
+        {
+          small: "smallString" as const,
+        },
+      ],
+    };
   },
-} satisfies TypefusionDbResult<typeof smallSchema>;
+} satisfies TypefusionDbScript<typeof smallSchema>;

@@ -20,7 +20,7 @@ export const typefusionRef = async <T extends TypefusionScriptExport>(
           ? R
           : never;
       }[]
-    : Awaited<ReturnType<T["run"]>>
+    : Awaited<ReturnType<T["run"]>>["data"]
 > => {
   if (module.resultDatabase === "postgresql") {
     return dbSelect(module).pipe(PgLiveEffect, Effect.runPromise) as any;
@@ -48,7 +48,7 @@ export const typefusionRefEffect = <T extends TypefusionScriptExport>(
           ? R
           : never;
       }
-    : Awaited<ReturnType<T["run"]>>,
+    : Awaited<ReturnType<T["run"]>>["data"],
   DatabaseSelectError | ConfigError
 > => {
   if (module.resultDatabase === "postgresql") {

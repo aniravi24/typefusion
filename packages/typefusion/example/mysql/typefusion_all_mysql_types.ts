@@ -1,4 +1,4 @@
-import { mySqlType, TypefusionDbResult } from "../../src/index.js";
+import { mySqlType, TypefusionDbScript } from "../../src/index.js";
 
 const allMySqlTypes = {
   text: mySqlType.text().notNull(),
@@ -24,24 +24,26 @@ export default {
   resultDatabase: "mysql",
   run: async () => {
     console.log("TYPEFUSION ALL MYSQL TYPES IS RUN");
-    return [
-      {
-        text: "Sample text",
-        int: 42,
-        boolean: true,
-        date: new Date("2023-05-17"),
-        dateTime: new Date("2023-05-17T12:34:56"),
-        bigint: BigInt("9007199254740991"),
-        smallint: 32767,
-        float: 3.14,
-        double: 3.141592653589793,
-        decimal: 123.45,
-        char: "Fixed     ",
-        varchar: "Variable length text",
-        time: "12:34:56",
-        json: { key: "value" },
-        binary: new Uint8Array([0x12]),
-      },
-    ];
+    return {
+      data: [
+        {
+          text: "Sample text",
+          int: 42,
+          boolean: true,
+          date: new Date("2023-05-17"),
+          dateTime: new Date("2023-05-17T12:34:56"),
+          bigint: BigInt("9007199254740991"),
+          smallint: 32767,
+          float: 3.14,
+          double: 3.141592653589793,
+          decimal: 123.45,
+          char: "Fixed     ",
+          varchar: "Variable length text",
+          time: "12:34:56",
+          json: { key: "value" },
+          binary: new Uint8Array([0x12]),
+        },
+      ],
+    };
   },
-} satisfies TypefusionDbResult<typeof allMySqlTypes>;
+} satisfies TypefusionDbScript<typeof allMySqlTypes>;

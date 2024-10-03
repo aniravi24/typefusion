@@ -1,6 +1,6 @@
 import { Schema } from "@effect/schema";
 import { Effect, Data } from "effect";
-import { TypefusionScriptExport } from "./types.js";
+import { TypefusionScriptExport, TypefusionScriptResult } from "./types.js";
 import { SqlClient } from "@effect/sql";
 import { PgType } from "./db/postgres/types.js";
 import { MySqlType } from "./db/mysql/types.js";
@@ -42,71 +42,73 @@ const ScriptExportSchema = Schema.Struct({
 });
 
 /**
- * The schema for the return type of a Typefusion script.
+ * The schema for the return type of a Typefusion script `run` function.
  */
-const ScriptResultSchema = Schema.Array(
-  Schema.Record({
-    key: Schema.String,
-    value: Schema.Unknown,
-  }),
-);
+const ScriptResultSchema = Schema.Struct({
+  data: Schema.Array(
+    Schema.Record({
+      key: Schema.String,
+      value: Schema.Unknown,
+    }),
+  ),
+});
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains the data without any schema.
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains the data without any schema.
  */
-export interface TypefusionResultDataOnly<
+export interface TypefusionScriptDataOnly<
   DataElement extends Record<string, unknown>,
 > extends TypefusionScriptExport {
   schema?: {
     [key in keyof DataElement]: DbType<DataElement[key]>;
   };
-  run: () => PromiseLike<DataElement[]>;
+  run: () => PromiseLike<TypefusionScriptResult<DataElement>>;
 }
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'schema' and return data
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data
  * you want to use your existing {@link PgType} or {@link MySqlType} schema.
  */
-export interface TypefusionDbResult<T extends Record<string, DbType<unknown>>>
+export interface TypefusionDbScript<T extends Record<string, DbType<unknown>>>
   extends TypefusionScriptExport {
   schema: T;
   run: () => PromiseLike<
-    {
+    TypefusionScriptResult<{
       [key in keyof T]: T[key] extends DbType<infer U> ? U : never;
-    }[]
+    }>
   >;
 }
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'schema' and return data
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data
  * you want to use your existing {@link PgType} or {@link MySqlType} schema.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
-export interface TypefusionDbResultDataUnknown<
+export interface TypefusionDbScriptDataUnknown<
   T extends Record<string, DbType<unknown>>,
 > extends TypefusionScriptExport {
   schema: T;
-  run: () => PromiseLike<Record<any, any>[]>;
+  run: () => PromiseLike<TypefusionScriptResult<Record<any, any>>>;
 }
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains both the 'schema' and return data.
- * This will check that your `pgType` schema matches the data you are returning, but it's more verbose than using {@link TypefusionDbResult}.
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data.
+ * This will check that your `pgType` schema matches the data you are returning, but it's more verbose than using {@link TypefusionDbScript}.
  */
 
-export interface TypefusionResult<DataElement extends Record<string, unknown>>
+export interface TypefusionScript<DataElement extends Record<string, unknown>>
   extends TypefusionScriptExport {
   schema: {
     [key in keyof DataElement]: DbType<DataElement[key]>;
   };
-  run: () => PromiseLike<DataElement[]>;
+  run: () => PromiseLike<TypefusionScriptResult<DataElement>>;
 }
 
 /**
- * The return type of a Typefusion script ({@link TypefusionScriptExport}) when the result contains potentially only the return data.
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains potentially only the return data.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
-export interface TypefusionResultUnknown
-  extends TypefusionResult<Record<string, unknown>> {}
+export interface TypefusionScriptUnknown
+  extends TypefusionScript<Record<string, unknown>> {}
 
 export class ConvertDataToSQLDDLError extends Data.TaggedError(
   "ConvertDataToSQLDDLError",
@@ -123,7 +125,7 @@ const convertTypefusionScriptResultToSQLDDL = (
     const dbHelper = yield* DatabaseHelper;
     // If no database types are provided, we will infer them from the result data
     if (!module.schema || Object.keys(module.schema).length === 0) {
-      if (result.length === 0) {
+      if (result.data.length === 0) {
         yield* Effect.fail(
           new ConvertDataToSQLDDLError({
             cause: null,
@@ -136,7 +138,7 @@ const convertTypefusionScriptResultToSQLDDL = (
       );
       // If an ID column is not explicitly provided, we will assume you don't want a primary key
       return yield* Effect.forEach(
-        Object.entries(result[0]),
+        Object.entries(result.data[0]),
         ([key, value]) =>
           Effect.if(key === "id", {
             onTrue: () => Effect.succeed(dbHelper.idColumn()),
@@ -209,7 +211,7 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
         .insertIntoTable(
           sql,
           module.name,
-          result as Parameters<typeof sql.insert>[0][],
+          result.data as Parameters<typeof sql.insert>[0][],
         )
         .pipe(
           Effect.mapError(

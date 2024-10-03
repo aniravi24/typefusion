@@ -1,4 +1,4 @@
-import { pgType, typefusionRef, TypefusionDbResult } from "../../src/index.js";
+import { pgType, typefusionRef, TypefusionDbScript } from "../../src/index.js";
 import typefusionDataOnly from "./typefusion_data_only.js";
 
 const smallSchema = {
@@ -12,10 +12,12 @@ export default {
   run: async () => {
     const result = await typefusionRef(typefusionDataOnly);
     console.log("TYPEFUSION PG RESULT IS RUN", result);
-    return [
-      {
-        small: "smallString" as const,
-      },
-    ];
+    return {
+      data: [
+        {
+          small: "smallString" as const,
+        },
+      ],
+    };
   },
-} satisfies TypefusionDbResult<typeof smallSchema>;
+} satisfies TypefusionDbScript<typeof smallSchema>;

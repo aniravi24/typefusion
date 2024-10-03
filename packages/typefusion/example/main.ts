@@ -1,5 +1,5 @@
 import { pgType } from "../src/db/postgres/types.js";
-import { TypefusionDbResult } from "../src/index.js";
+import { TypefusionDbScript } from "../src/index.js";
 
 export const mainSchema = {
   id: pgType.integer().notNull(),
@@ -15,14 +15,16 @@ export default {
   resultDatabase: "postgresql",
   run: async () => {
     console.log("MAIN IS RUN");
-    return [
-      {
-        id: 1,
-        name: "John Doe",
-        age: 30,
-        email: "john.doe@example.com",
-        address: "123 Main St",
-      },
-    ];
+    return {
+      data: [
+        {
+          id: 1,
+          name: "John Doe",
+          age: 30,
+          email: "john.doe@example.com",
+          address: "123 Main St",
+        },
+      ],
+    };
   },
-} satisfies TypefusionDbResult<typeof mainSchema>;
+} satisfies TypefusionDbScript<typeof mainSchema>;

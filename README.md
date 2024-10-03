@@ -66,7 +66,7 @@ After following the above instructions, create a script file in the directory, f
 
 ```ts
 // or mySqlType for mysql
-import { pgType, typefusionRef, TypefusionDbResult } from "typefusion";
+import { pgType, typefusionRef, TypefusionDbScript } from "typefusion";
 
 const mainSchema = {
   id: pgType.integer().notNull(),
@@ -82,17 +82,19 @@ export default {
   resultDatabase: "postgresql",
   run: async () => {
     console.log("running main");
-    return [
-      {
-        id: 1,
-        name: "John Doe",
-        age: 30,
-        email: "john.doe@example.com",
-        address: "123 Main St",
-      },
-    ];
+    return {
+      data: [
+        {
+          id: 1,
+          name: "John Doe",
+          age: 30,
+          email: "john.doe@example.com",
+          address: "123 Main St",
+        },
+      ],
+    };
   },
-} satisfies TypefusionDbResult<typeof mainSchema>;
+} satisfies TypefusionDbScript<typeof mainSchema>;
 ```
 
 **Warning:** Typefusion is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and does not provide a CommonJS export.
@@ -145,7 +147,7 @@ Typefusion Refs enable you to reference the results of one script in another, fa
 
 ```ts
 // or mySqlType for mysql
-import { pgType, typefusionRef, TypefusionDbResult } from "typefusion";
+import { pgType, typefusionRef, TypefusionDbScript } from "typefusion";
 import main from "./main.js";
 
 const smallSchema = {
@@ -159,13 +161,15 @@ export default {
   run: async () => {
     const result = await typefusionRef(main);
     console.log("typefusion ref main result", result);
-    return [
-      {
-        small: "smallString" as const,
-      },
-    ];
+    return {
+      data: [
+        {
+          small: "smallString" as const,
+        },
+      ],
+    };
   },
-} satisfies TypefusionDbResult<typeof smallSchema>;
+} satisfies TypefusionDbScript<typeof smallSchema>;
 ```
 
 For cases where you only need the table name without fetching the full data, use the `typefusionRefTableName` function:

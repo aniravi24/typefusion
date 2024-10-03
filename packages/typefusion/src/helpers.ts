@@ -3,7 +3,7 @@ import { SkottNode } from "skott/graph/node";
 import { dbInsert } from "./store.js";
 import { PgLiveEffect } from "./db/postgres/client.js";
 import { MySqlLiveEffect } from "./db/mysql/client.js";
-import { TypefusionScript } from "./types.js";
+import { TypefusionScriptModule } from "./types.js";
 
 /**
  * Traverses a dependency graph and returns an array of execution levels.
@@ -65,7 +65,9 @@ export function runTypefusionScript(leaf: string) {
 
     const moduleDefault = yield* Effect.tryPromise({
       try: async () =>
-        import(path).then((module) => (module as TypefusionScript).default),
+        import(path).then(
+          (module) => (module as TypefusionScriptModule).default,
+        ),
       catch: (error) =>
         new ModuleImportError({
           cause: error,

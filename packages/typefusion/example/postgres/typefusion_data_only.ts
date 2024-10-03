@@ -1,4 +1,4 @@
-import { typefusionRef, TypefusionResultDataOnly } from "../../src/index.js";
+import { typefusionRef, TypefusionScriptDataOnly } from "../../src/index.js";
 import main from "../main.js";
 import typefusionResult from "./typefusion_result.js";
 
@@ -10,10 +10,12 @@ export default {
     const leafResult = await typefusionRef(typefusionResult);
 
     console.log("TYPEFUSION DATA ONLY IS RUN", mainResult, leafResult);
-    return [
-      {
-        dataOnly: "dataOnlyString",
-      },
-    ];
+    return {
+      data: [
+        {
+          dataOnly: "dataOnlyString",
+        },
+      ],
+    };
   },
-} satisfies TypefusionResultDataOnly<{ dataOnly: string }>;
+} satisfies TypefusionScriptDataOnly<{ dataOnly: string }>;

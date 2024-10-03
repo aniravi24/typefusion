@@ -11,10 +11,12 @@ export default {
   run: async () => {
     const result = await typefusionRef(main);
     console.log("TYPEFUSION NO TYPES IS RUN", result);
-    return [
-      {
-        noTypes: "noTypesString" as const,
-      },
-    ];
+    return {
+      data: [
+        {
+          noTypes: "noTypesString" as const,
+        },
+      ],
+    };
   },
 };

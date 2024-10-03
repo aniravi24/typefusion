@@ -14,10 +14,10 @@ export { typefusionRef, typefusionRefTableName } from "./lib.js";
 export { UnsupportedJSTypeDbConversionError } from "./db/common/service.js";
 
 export {
-  TypefusionDbResult,
-  TypefusionResult,
-  TypefusionResultDataOnly,
-  TypefusionResultUnknown,
+  TypefusionDbScript,
+  TypefusionScript,
+  TypefusionScriptDataOnly,
+  TypefusionScriptUnknown,
   ConvertDataToSQLDDLError,
   DatabaseSelectError,
   DatabaseInsertError,

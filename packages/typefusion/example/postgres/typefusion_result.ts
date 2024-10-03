@@ -1,4 +1,4 @@
-import { pgType, TypefusionResult } from "../../src/index.js";
+import { pgType, TypefusionScript } from "../../src/index.js";
 
 export default {
   name: "typefusion_result",
@@ -8,10 +8,12 @@ export default {
   },
   run: async () => {
     console.log("TYPEFUSION RESULT IS RUN");
-    return [
-      {
-        leaf: "leafString",
-      },
-    ];
+    return {
+      data: [
+        {
+          leaf: "leafString",
+        },
+      ],
+    };
   },
-} satisfies TypefusionResult<{ leaf: string }>;
+} satisfies TypefusionScript<{ leaf: string }>;
