@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.7
+
+### Patch Changes
+
+- [`52a412e`](https://github.com/aniravi24/typefusion/commit/52a412e0c44f22c7725ccf709b3bc9e24ed700cf) Thanks [@aniravi24](https://github.com/aniravi24)! - Return a data payload explicitly
+
 ## 0.0.6
 
 ### Patch Changes
