@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.8
+
+### Patch Changes
+
+- [`c6c5de8`](https://github.com/aniravi24/typefusion/commit/c6c5de86bd4ef8e03951567540d934f059d2ddc3) Thanks [@aniravi24](https://github.com/aniravi24)! - Update effect deps to fix hanging when sql client not connected
+
 ## 0.0.7
 
 ### Patch Changes
