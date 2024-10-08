@@ -1,11 +1,15 @@
 import { Schema } from "@effect/schema";
 import { Effect, Data } from "effect";
-import { TypefusionScriptExport, TypefusionScriptResult } from "./types.js";
-import { SqlClient } from "@effect/sql";
+import {
+  TypefusionScriptExport,
+  TypefusionScriptResult,
+  TypefusionSupportedDatabases,
+} from "./types.js";
 import { PgType } from "./db/postgres/types.js";
 import { MySqlType } from "./db/mysql/types.js";
 import { DbType } from "./db/common/types.js";
-import { DatabaseHelper } from "./db/common/service.js";
+import { PgDatabaseHelperService, PgService } from "./db/postgres/client.js";
+import { MySQLDatabaseHelperService, MySQLService } from "./db/mysql/client.js";
 
 // For some reason when we dynamically import the PgType when executing scripts, somePgType instanceof PgType is false
 const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
@@ -117,12 +121,21 @@ export class ConvertDataToSQLDDLError extends Data.TaggedError(
   message: string;
 }> {}
 
+const dbServiceAndHelper = (databaseType: TypefusionSupportedDatabases) => {
+  switch (databaseType) {
+    case "postgresql":
+      return { service: PgService, helper: PgDatabaseHelperService };
+    case "mysql":
+      return { service: MySQLService, helper: MySQLDatabaseHelperService };
+  }
+};
+
 const convertTypefusionScriptResultToSQLDDL = (
   module: TypefusionScriptExport,
   result: Schema.Schema.Type<typeof ScriptResultSchema>,
 ) =>
   Effect.gen(function* () {
-    const dbHelper = yield* DatabaseHelper;
+    const dbHelper = yield* dbServiceAndHelper(module.resultDatabase).helper;
     // If no database types are provided, we will infer them from the result data
     if (!module.schema || Object.keys(module.schema).length === 0) {
       if (result.data.length === 0) {
@@ -174,8 +187,8 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
     const moduleIsValidSchema = Schema.is(ScriptExportSchema)(module);
 
     if (resultIsValidSchema && moduleIsValidSchema) {
-      const sql = yield* SqlClient.SqlClient;
-      const dbHelper = yield* DatabaseHelper;
+      const sql = yield* dbServiceAndHelper(module.resultDatabase).service;
+      const dbHelper = yield* dbServiceAndHelper(module.resultDatabase).helper;
 
       yield* dbHelper.dropTableIfExists(sql, module.name).pipe(
         Effect.mapError(
@@ -258,8 +271,8 @@ export class DatabaseSelectError extends Data.TaggedError(
 
 export const dbSelect = (module: TypefusionScriptExport) =>
   Effect.gen(function* () {
-    const sql = yield* SqlClient.SqlClient;
-    const dbHelper = yield* DatabaseHelper;
+    const sql = yield* dbServiceAndHelper(module.resultDatabase).service;
+    const dbHelper = yield* dbServiceAndHelper(module.resultDatabase).helper;
     return yield* dbHelper.selectAllFromTable(sql, module.name).pipe(
       Effect.mapError(
         (error) =>

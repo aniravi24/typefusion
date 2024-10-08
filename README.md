@@ -18,7 +18,6 @@
   - [Effect Integration](#effect-integration)
   - [Troubleshooting](#troubleshooting)
     - [The graph is empty when I run Typefusion](#the-graph-is-empty-when-i-run-typefusion)
-    - [I'm seeing undefined errors for script imports](#im-seeing-undefined-errors-for-script-imports)
   - [Contributing](#contributing)
 
 ## Introduction
@@ -204,10 +203,6 @@ Typefusion is built with [Effect](https://effect.website). Refer to the referenc
 ### The graph is empty when I run Typefusion
 
 This can happen because the library Typefusion depends on to generate the dependency graph ignores common build directories by default. For example, you cannot output scripts to `build`, `dist`, and several others ([full list here](https://github.com/antoine-coulon/skott/blob/main/packages/skott/src/modules/resolvers/base-resolver.ts#L95)).
-
-### I'm seeing undefined errors for script imports
-
-The recommended way to define your script function is using a default export and named function (not an anonymous function). The function does not have to be async. This way, Typefusion can properly resolve your module. Typefusion does not use any compiler magic or do any sort of file parsing.
 
 ---
 

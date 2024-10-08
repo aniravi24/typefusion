@@ -1,6 +1,15 @@
 import { MysqlClient } from "@effect/sql-mysql2";
 import { Config, Effect, Layer, Redacted } from "effect";
-import { MySqlDatabaseHelperContext } from "../common/layer.js";
+import { SqlClient } from "@effect/sql";
+import { DatabaseHelper } from "../common/service.js";
+import {
+  mySqlDropTableIfExists,
+  mySqlCreateTableIfNotExists,
+  mySqlInsertIntoTable,
+  mySqlSelectAllFromTable,
+  mySqlColumnDDL,
+} from "./helpers.js";
+import { valueToMySqlType, mySqlIdColumn } from "./types.js";
 
 /**
  * @internal
@@ -32,13 +41,49 @@ export const MySqlDatabaseConfig = Config.orElse(
 /**
  * @internal
  */
-export const MySqlLive = MysqlClient.layer({
+const MySqlLive = MysqlClient.layer({
   url: MySqlDatabaseConfig,
 });
 
 /**
  * @internal
  */
-export const MySqlLiveEffect = Effect.provide(
-  Layer.mergeAll(MySqlLive, Layer.succeedContext(MySqlDatabaseHelperContext)),
+export class MySQLService extends Effect.Service<MySQLService>()(
+  "@typefusion/mysql",
+  {
+    effect: SqlClient.SqlClient,
+    dependencies: [MySqlLive],
+  },
+) {}
+
+/**
+ * @internal
+ */
+export const MySqlDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
+  valueToDbType: valueToMySqlType,
+  idColumn: mySqlIdColumn,
+  dropTableIfExists: mySqlDropTableIfExists,
+  createTableIfNotExists: mySqlCreateTableIfNotExists,
+  insertIntoTable: mySqlInsertIntoTable,
+  selectAllFromTable: mySqlSelectAllFromTable,
+  columnDDL: mySqlColumnDDL,
+});
+
+/**
+ * @internal
+ */
+export class MySQLDatabaseHelperService extends Effect.Service<MySQLDatabaseHelperService>()(
+  "@typefusion/mysql/databasehelper",
+  {
+    effect: DatabaseHelper,
+    dependencies: [MySqlDatabaseHelperLive],
+  },
+) {}
+
+/**
+ * @internal
+ */
+export const MySqlFinalLive = Layer.mergeAll(
+  MySQLService.Default,
+  MySQLDatabaseHelperService.Default,
 );

@@ -14,7 +14,7 @@ export class UnsupportedJSTypeDbConversionError extends Data.TaggedError(
 /**
  * @internal
  */
-export class DatabaseHelper extends Context.Tag("DatabaseHelper")<
+export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
   DatabaseHelper,
   {
     /**

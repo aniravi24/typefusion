@@ -2,8 +2,8 @@ import { Effect } from "effect";
 import { DatabaseSelectError, dbSelect } from "./store.js";
 import { ConfigError } from "effect/ConfigError";
 import { TypefusionScriptExport } from "./types.js";
-import { PgLiveEffect } from "./db/postgres/client.js";
-import { MySqlLiveEffect } from "./db/mysql/client.js";
+import { PgFinalLive } from "./db/postgres/client.js";
+import { MySqlFinalLive } from "./db/mysql/client.js";
 /**
  * Get the data from a module (i.e. the result of one of your Typefusion scripts).
  * @param module - The module to get the data from.
@@ -22,16 +22,10 @@ export const typefusionRef = async <T extends TypefusionScriptExport>(
       }[]
     : Awaited<ReturnType<T["run"]>>["data"]
 > => {
-  if (module.resultDatabase === "postgresql") {
-    return dbSelect(module).pipe(PgLiveEffect, Effect.runPromise) as any;
-  }
-  if (module.resultDatabase === "mysql") {
-    return dbSelect(module).pipe(MySqlLiveEffect, Effect.runPromise) as any;
-  } else {
-    throw new Error(
-      `Unsupported database type provided for module ${module.name}: ${module.resultDatabase}`,
-    );
-  }
+  return dbSelect(module).pipe(
+    Effect.provide([PgFinalLive, MySqlFinalLive]),
+    Effect.runPromise,
+  ) as any;
 };
 
 /**
@@ -51,16 +45,9 @@ export const typefusionRefEffect = <T extends TypefusionScriptExport>(
     : Awaited<ReturnType<T["run"]>>["data"],
   DatabaseSelectError | ConfigError
 > => {
-  if (module.resultDatabase === "postgresql") {
-    return dbSelect(module).pipe(PgLiveEffect) as any;
-  }
-  if (module.resultDatabase === "mysql") {
-    return dbSelect(module).pipe(MySqlLiveEffect) as any;
-  } else {
-    return Effect.dieMessage(
-      `Unsupported database type provided for module ${module.name}: ${module.resultDatabase}`,
-    );
-  }
+  return dbSelect(module).pipe(
+    Effect.provide([PgFinalLive, MySqlFinalLive]),
+  ) as any;
 };
 
 /**
