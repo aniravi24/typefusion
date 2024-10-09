@@ -1,6 +1,7 @@
 import { Schema } from "@effect/schema";
 import { Effect, Data } from "effect";
 import {
+  TypefusionContextEffect,
   TypefusionScriptExport,
   TypefusionScriptResult,
   TypefusionSupportedDatabases,
@@ -28,22 +29,30 @@ const MySqlTypeSchema = Schema.declare(
   },
 );
 
-const ScriptExportSchema = Schema.Struct({
-  name: Schema.String,
-  resultDatabase: Schema.Literal("postgresql", "mysql"),
-  schema: Schema.Union(
-    Schema.Record({
-      key: Schema.String,
-      value: PgTypeSchema,
+const ScriptExportSchema = Schema.extend(
+  Schema.Struct({
+    name: Schema.String,
+    resultDatabase: Schema.Literal("postgresql", "mysql"),
+    schema: Schema.Union(
+      Schema.Record({
+        key: Schema.String,
+        value: PgTypeSchema,
+      }),
+      Schema.Record({
+        key: Schema.String,
+        value: MySqlTypeSchema,
+      }),
+    ).pipe(Schema.optional),
+  }),
+  Schema.Union(
+    Schema.Struct({
+      run: Schema.Any,
     }),
-    Schema.Record({
-      key: Schema.String,
-      value: MySqlTypeSchema,
+    Schema.Struct({
+      runEffect: Schema.Any,
     }),
-  ).pipe(Schema.optional),
-
-  run: Schema.Any,
-});
+  ),
+);
 
 /**
  * The schema for the return type of a Typefusion script `run` function.
@@ -70,6 +79,22 @@ export interface TypefusionScriptDataOnly<
 }
 
 /**
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains the data without any schema.
+ */
+export interface TypefusionScriptDataOnlyEffect<
+  DataElement extends Record<string, unknown>,
+> extends TypefusionScriptExport {
+  schema?: {
+    [key in keyof DataElement]: DbType<DataElement[key]>;
+  };
+  runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
+    TypefusionScriptResult<DataElement>,
+    any,
+    R
+  >;
+}
+
+/**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data
  * you want to use your existing {@link PgType} or {@link MySqlType} schema.
  */
@@ -84,6 +109,23 @@ export interface TypefusionDbScript<T extends Record<string, DbType<unknown>>>
 }
 
 /**
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains both the 'schema' and return data
+ * you want to use your existing {@link PgType} or {@link MySqlType} schema.
+ */
+export interface TypefusionDbScriptEffect<
+  T extends Record<string, DbType<unknown>>,
+> extends TypefusionScriptExport {
+  schema: T;
+  runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
+    TypefusionScriptResult<{
+      [key in keyof T]: T[key] extends DbType<infer U> ? U : never;
+    }>,
+    any,
+    R
+  >;
+}
+
+/**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data
  * you want to use your existing {@link PgType} or {@link MySqlType} schema.
  * However, the data is unknown, so you can pass in any data array and it will type check.
@@ -94,6 +136,23 @@ export interface TypefusionDbScriptDataUnknown<
   schema: T;
   run: () => PromiseLike<TypefusionScriptResult<Record<any, any>>>;
 }
+
+/**
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains both the 'schema' and return data
+ * you want to use your existing {@link PgType} or {@link MySqlType} schema.
+ * However, the data is unknown, so you can pass in any data array and it will type check.
+ */
+export interface TypefusionDbScriptDataUnknownEffect<
+  T extends Record<string, DbType<unknown>>,
+> extends TypefusionScriptExport {
+  schema: T;
+  runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
+    TypefusionScriptResult<Record<any, any>>,
+    any,
+    R
+  >;
+}
+
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data.
  * This will check that your `pgType` schema matches the data you are returning, but it's more verbose than using {@link TypefusionDbScript}.
@@ -108,11 +167,35 @@ export interface TypefusionScript<DataElement extends Record<string, unknown>>
 }
 
 /**
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains both the 'schema' and return data.
+ * This will check that your `pgType` schema matches the data you are returning, but it's more verbose than using {@link TypefusionDbScript}.
+ */
+export interface TypefusionScriptEffect<
+  DataElement extends Record<string, unknown>,
+> extends TypefusionScriptExport {
+  schema: {
+    [key in keyof DataElement]: DbType<DataElement[key]>;
+  };
+  runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
+    TypefusionScriptResult<DataElement>,
+    any,
+    R
+  >;
+}
+
+/**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains potentially only the return data.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
 export interface TypefusionScriptUnknown
   extends TypefusionScript<Record<string, unknown>> {}
+
+/**
+ * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains potentially only the return data.
+ * However, the data is unknown, so you can pass in any data array and it will type check.
+ */
+export interface TypefusionScriptUnknownEffect
+  extends TypefusionScriptEffect<Record<string, unknown>> {}
 
 export class ConvertDataToSQLDDLError extends Data.TaggedError(
   "ConvertDataToSQLDDLError",

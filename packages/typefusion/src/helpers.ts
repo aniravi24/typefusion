@@ -73,14 +73,17 @@ export function runTypefusionScript(leaf: string) {
         }),
     });
 
-    const result = yield* Effect.tryPromise({
-      try: async () => moduleDefault.run(),
-      catch: (error) =>
-        new ModuleExecutionError({
-          cause: error,
-          message: `Error executing module '${leaf}'`,
-        }),
-    });
+    const result = yield* moduleDefault.runEffect
+      ? moduleDefault.runEffect()
+      : Effect.tryPromise({
+          // Either runEffect or run must be defined, so we'll use the non-null assertion to satisfy TypeScript
+          try: async () => moduleDefault.run!(),
+          catch: (error) =>
+            new ModuleExecutionError({
+              cause: error,
+              message: `Error executing module '${leaf}'`,
+            }),
+        });
 
     return yield* dbInsert(moduleDefault, result);
   });
