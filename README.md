@@ -196,7 +196,7 @@ For detailed API documentation, visit the [reference docs](https://aniravi24.git
 
 ## Effect Integration
 
-Typefusion is built with [Effect](https://effect.website). Refer to the reference docs for details on Effect-suffixed functions and their usage. Most of the time, you just need to suffix the types and functions with `Effect` to use them. For example, `typefusionRef` becomes `typefusionRefEffect`, `TypefusionDbScript` becomes `TypefusionDbScriptEffect`, and `run` becomes `runEffect`.
+Typefusion is built with [Effect](https://effect.website). Refer to the reference docs for details on Effect-suffixed functions and their usage. Most of the time, you just need to suffix the types and functions with `Effect` to use them. For example, `typefusionRef` becomes `typefusionRefEffect`, `TypefusionDbScript` becomes `TypefusionDbScriptEffect`, and `run` becomes `runEffect`. The `typefusion` library export is `typefusionEffect`.
 
 ## Troubleshooting
 

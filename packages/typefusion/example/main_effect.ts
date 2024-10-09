@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { pgType } from "../src/db/postgres/types.js";
-import { TypefusionDbScriptEffect } from "../src/store.js";
+import { TypefusionDbScriptEffect } from "../src/effect.js";
 
 export const mainSchema = {
   id: pgType.integer().notNull(),

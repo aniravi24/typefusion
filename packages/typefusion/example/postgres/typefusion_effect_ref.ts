@@ -1,8 +1,9 @@
 import { Effect } from "effect";
 import { pgType } from "../../src/index.js";
 import { typefusionRefEffect } from "../../src/lib.js";
-import { TypefusionDbScriptEffect } from "../../src/store.js";
+import { TypefusionDbScriptEffect } from "../../src/effect.js";
 import mainEffect from "../main_effect.js";
+
 const smallSchema = {
   small: pgType.text().notNull(),
 };
