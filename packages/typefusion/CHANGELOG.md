@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.9
+
+### Patch Changes
+
+- [#26](https://github.com/aniravi24/typefusion/pull/26) [`8427687`](https://github.com/aniravi24/typefusion/commit/8427687d09fcc66cfd181021163811d54fbb9dcb) Thanks [@aniravi24](https://github.com/aniravi24)! - support Effect in workflows
+
 ## 0.0.8
 
 ### Patch Changes
