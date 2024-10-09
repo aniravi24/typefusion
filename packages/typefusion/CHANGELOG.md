@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.10
+
+### Patch Changes
+
+- [`483d8bf`](https://github.com/aniravi24/typefusion/commit/483d8bf4db2c5e51d6478a9c07d8033cbfb2ee8a) Thanks [@aniravi24](https://github.com/aniravi24)! - export Effect types from Effect module
+
 ## 0.0.9
 
 ### Patch Changes
