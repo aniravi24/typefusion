@@ -20,7 +20,15 @@ export const typefusionRef = async <T extends TypefusionScriptExport>(
           ? R
           : never;
       }[]
-    : Awaited<ReturnType<T["run"]>>["data"]
+    : T extends { runEffect: (...args: any[]) => any }
+      ? Effect.Effect.Success<ReturnType<T["runEffect"]>> extends {
+          data: infer D;
+        }
+        ? D
+        : never
+      : T extends { run: (...args: any[]) => any }
+        ? Awaited<ReturnType<T["run"]>>["data"]
+        : never
 > => {
   return dbSelect(module).pipe(
     Effect.provide([PgFinalLive, MySqlFinalLive]),
@@ -41,13 +49,19 @@ export const typefusionRefEffect = <T extends TypefusionScriptExport>(
         }
           ? R
           : never;
-      }
-    : Awaited<ReturnType<T["run"]>>["data"],
+      }[]
+    : T extends { runEffect: (...args: any[]) => any }
+      ? Effect.Effect.Success<ReturnType<T["runEffect"]>> extends {
+          data: infer D;
+        }
+        ? D
+        : never
+      : T extends { run: (...args: any[]) => any }
+        ? Awaited<ReturnType<T["run"]>>["data"]
+        : never,
   DatabaseSelectError | ConfigError
 > => {
-  return dbSelect(module).pipe(
-    Effect.provide([PgFinalLive, MySqlFinalLive]),
-  ) as any;
+  return dbSelect(module) as any;
 };
 
 /**
