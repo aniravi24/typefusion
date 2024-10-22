@@ -29,6 +29,8 @@ export * from "./db/postgres/types.js";
 
 export * from "./db/mysql/types.js";
 
+export * from "./db/clickhouse/types.js";
+
 export {
   TypefusionSupportedDatabases,
   TypefusionScriptExport,

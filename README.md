@@ -48,10 +48,10 @@ To begin using Typefusion, follow these steps:
    bun add typefusion
    ```
 
-2. Configure your database connection using one of these methods (PostgreSQL and MySQL are supported):
+2. Configure your database connection using one of these methods (PostgreSQL, MySQL, and Clickhouse are supported):
 
-   - Set a full connection string in the `PG_DATABASE_URL` or `MYSQL_DATABASE_URL` environment variable.
-   - Set individual environment variables: `PG_DATABASE`, `PG_HOST`, `PG_PORT`, `PG_PASSWORD`, and `PG_USER` (for postgres) or `MYSQL_DATABASE`, `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_PASSWORD`, and `MYSQL_USER` (for mysql).
+   - Set a full connection string in the `PG_DATABASE_URL` or `MYSQL_DATABASE_URL` or `CLICKHOUSE_DATABASE_URL` (and optionally `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`, and `CLICKHOUSE_DATABASE` if not using the defaults) environment variable.
+   - Set individual environment variables: `PG_DATABASE`, `PG_HOST`, `PG_PORT`, `PG_PASSWORD`, and `PG_USER` (for postgres) or `MYSQL_DATABASE`, `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_PASSWORD`, and `MYSQL_USER` (for mysql) or `CLICKHOUSE_DATABASE`, `CLICKHOUSE_HOST`, `CLICKHOUSE_PORT`, `CLICKHOUSE_PASSWORD`, and `CLICKHOUSE_USER` (for clickhouse).
 
 3. Create a directory for your scripts (e.g., `workflows`).
 
@@ -64,7 +64,7 @@ To begin using Typefusion, follow these steps:
 After following the above instructions, create a script file in the directory, for example, `main.ts`:
 
 ```ts
-// or mySqlType for mysql
+// or mySqlType for mysql or clickhouseType for clickhouse
 import { pgType, typefusionRef, TypefusionDbScript } from "typefusion";
 
 const mainSchema = {

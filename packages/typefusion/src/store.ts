@@ -1,4 +1,4 @@
-import { Schema } from "@effect/schema";
+import { Schema } from "effect";
 import { Effect, Data } from "effect";
 import {
   TypefusionContextEffect,
@@ -11,6 +11,11 @@ import { MySqlType } from "./db/mysql/types.js";
 import { DbType } from "./db/common/types.js";
 import { PgDatabaseHelperService, PgService } from "./db/postgres/client.js";
 import { MySQLDatabaseHelperService, MySQLService } from "./db/mysql/client.js";
+import {
+  ClickhouseService,
+  ClickhouseDatabaseHelperService,
+} from "./db/clickhouse/client.js";
+import { ClickhouseType } from "./db/clickhouse/types.js";
 
 // For some reason when we dynamically import the PgType when executing scripts, somePgType instanceof PgType is false
 const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
@@ -29,10 +34,19 @@ const MySqlTypeSchema = Schema.declare(
   },
 );
 
+const ClickhouseTypeSchema = Schema.declare(
+  <T>(input: unknown): input is ClickhouseType<T> => {
+    if (typeof input === "object" && input !== null) {
+      return "_tag" in input && input["_tag"] === "ClickhouseType";
+    }
+    return false;
+  },
+);
+
 const ScriptExportSchema = Schema.extend(
   Schema.Struct({
     name: Schema.String,
-    resultDatabase: Schema.Literal("postgresql", "mysql"),
+    resultDatabase: Schema.Literal("postgresql", "mysql", "clickhouse"),
     schema: Schema.Union(
       Schema.Record({
         key: Schema.String,
@@ -41,6 +55,10 @@ const ScriptExportSchema = Schema.extend(
       Schema.Record({
         key: Schema.String,
         value: MySqlTypeSchema,
+      }),
+      Schema.Record({
+        key: Schema.String,
+        value: ClickhouseTypeSchema,
       }),
     ).pipe(Schema.optional),
   }),
@@ -96,7 +114,7 @@ export interface TypefusionScriptDataOnlyEffect<
 
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data
- * you want to use your existing {@link PgType} or {@link MySqlType} schema.
+ * you want to use your existing {@link PgType} or {@link MySqlType} or {@link ClickhouseType} schema.
  */
 export interface TypefusionDbScript<T extends Record<string, DbType<unknown>>>
   extends TypefusionScriptExport {
@@ -110,7 +128,7 @@ export interface TypefusionDbScript<T extends Record<string, DbType<unknown>>>
 
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains both the 'schema' and return data
- * you want to use your existing {@link PgType} or {@link MySqlType} schema.
+ * you want to use your existing {@link PgType} or {@link MySqlType} or {@link ClickhouseType} schema.
  */
 export interface TypefusionDbScriptEffect<
   T extends Record<string, DbType<unknown>>,
@@ -127,7 +145,7 @@ export interface TypefusionDbScriptEffect<
 
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains both the 'schema' and return data
- * you want to use your existing {@link PgType} or {@link MySqlType} schema.
+ * you want to use your existing {@link PgType} or {@link MySqlType} or {@link ClickhouseType} schema.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
 export interface TypefusionDbScriptDataUnknown<
@@ -139,7 +157,7 @@ export interface TypefusionDbScriptDataUnknown<
 
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains both the 'schema' and return data
- * you want to use your existing {@link PgType} or {@link MySqlType} schema.
+ * you want to use your existing {@link PgType} or {@link MySqlType} or {@link ClickhouseType} schema.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
 export interface TypefusionDbScriptDataUnknownEffect<
@@ -210,6 +228,11 @@ const dbServiceAndHelper = (databaseType: TypefusionSupportedDatabases) => {
       return { service: PgService, helper: PgDatabaseHelperService };
     case "mysql":
       return { service: MySQLService, helper: MySQLDatabaseHelperService };
+    case "clickhouse":
+      return {
+        service: ClickhouseService,
+        helper: ClickhouseDatabaseHelperService,
+      };
   }
 };
 
