@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.11
+
+### Patch Changes
+
+- [#37](https://github.com/aniravi24/typefusion/pull/37) [`f7fa6c7`](https://github.com/aniravi24/typefusion/commit/f7fa6c7f47b10fc1e1dc6071a36fa31b90a908c5) Thanks [@aniravi24](https://github.com/aniravi24)! - Clickhouse support
+
 ## 0.0.10
 
 ### Patch Changes
