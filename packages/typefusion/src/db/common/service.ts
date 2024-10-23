@@ -3,6 +3,8 @@ import { PgType } from "../postgres/types.js";
 import { MySqlType } from "../mysql/types.js";
 import { SqlClient } from "@effect/sql/SqlClient";
 import { Row } from "@effect/sql/SqlConnection";
+import { ClickhouseType } from "../clickhouse/types.js";
+import { ClickhouseClient } from "@effect/sql-clickhouse/ClickhouseClient";
 
 export class UnsupportedJSTypeDbConversionError extends Data.TaggedError(
   "UnsupportedJSTypeDbConversionError",
@@ -27,10 +29,12 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
     ) => Effect.Effect<string, UnsupportedJSTypeDbConversionError, never>;
     /**
      * @internal
-     * @param type a {@link MySqlType} or {@link PgType}
+     * @param type a {@link PgType} or {@link MySqlType} or {@link ClickhouseType}
      * @returns a string representing the id column DDL
      */
-    readonly idColumn: <T extends PgType<unknown> | MySqlType<unknown>>(
+    readonly idColumn: <
+      T extends PgType<unknown> | MySqlType<unknown> | ClickhouseType<unknown>,
+    >(
       type?: T,
     ) => string;
     /**
@@ -47,7 +51,7 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @returns An effect that will drop the table if it exists
      */
     readonly dropTableIfExists: (
-      sql: SqlClient,
+      sql: SqlClient | ClickhouseClient,
       tableName: string,
     ) => Effect.Effect<void, unknown, never>;
     /**
@@ -58,7 +62,7 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @returns An effect that will create the table if it does not exist
      */
     readonly createTableIfNotExists: (
-      sql: SqlClient,
+      sql: SqlClient | ClickhouseClient,
       tableName: string,
       columnDefinitions: string,
     ) => Effect.Effect<void, unknown, never>;
@@ -70,7 +74,7 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @returns An effect that will insert the data into the table
      */
     readonly insertIntoTable: (
-      sql: SqlClient,
+      sql: SqlClient | ClickhouseClient,
       tableName: string,
       data: unknown[],
     ) => Effect.Effect<void, unknown, never>;
@@ -81,7 +85,7 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @returns An effect that will select all from the table
      */
     readonly selectAllFromTable: (
-      sql: SqlClient,
+      sql: SqlClient | ClickhouseClient,
       tableName: string,
     ) => Effect.Effect<readonly Row[], unknown, never>;
   }

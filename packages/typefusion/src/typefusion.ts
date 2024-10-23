@@ -9,6 +9,7 @@ import {
 } from "./helpers.js";
 import { PgFinalLive } from "./db/postgres/client.js";
 import { MySqlFinalLive } from "./db/mysql/client.js";
+import { ClickhouseFinalLive } from "./db/clickhouse/client.js";
 
 export const DependencyGraphGenerationError = Data.TaggedError(
   "DependencyGraphGenerationError",
@@ -88,4 +89,11 @@ export const typefusion = (config: TypefusionConfig) =>
     }
 
     return executionLevels;
-  }).pipe(Effect.provide([NodeFileSystem.layer, PgFinalLive, MySqlFinalLive]));
+  }).pipe(
+    Effect.provide([
+      NodeFileSystem.layer,
+      PgFinalLive,
+      MySqlFinalLive,
+      ClickhouseFinalLive,
+    ]),
+  );

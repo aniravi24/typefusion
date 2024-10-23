@@ -4,6 +4,7 @@ import { ConfigError } from "effect/ConfigError";
 import { TypefusionScriptExport } from "./types.js";
 import { PgFinalLive } from "./db/postgres/client.js";
 import { MySqlFinalLive } from "./db/mysql/client.js";
+import { ClickhouseFinalLive } from "./db/clickhouse/client.js";
 /**
  * Get the data from a module (i.e. the result of one of your Typefusion scripts).
  * @param module - The module to get the data from.
@@ -31,7 +32,7 @@ export const typefusionRef = async <T extends TypefusionScriptExport>(
         : never
 > => {
   return dbSelect(module).pipe(
-    Effect.provide([PgFinalLive, MySqlFinalLive]),
+    Effect.provide([PgFinalLive, MySqlFinalLive, ClickhouseFinalLive]),
     Effect.runPromise,
   ) as any;
 };
