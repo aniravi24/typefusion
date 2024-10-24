@@ -15,7 +15,7 @@ export default {
   schema: smallSchema,
   run: async () => {
     const result = await typefusionRef(main);
-    console.log("TYPEFUSION PG RESULT IS RUN", result);
+    console.log("TYPEFUSION MYSQL RESULT IS RUN", result);
     return {
       data: [
         {
