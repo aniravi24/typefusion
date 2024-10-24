@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.12
+
+### Patch Changes
+
+- [#40](https://github.com/aniravi24/typefusion/pull/40) [`5b27c0c`](https://github.com/aniravi24/typefusion/commit/5b27c0c2d63f02a4fc4dde8b19f6d3fa1f8af006) Thanks [@aniravi24](https://github.com/aniravi24)! - Only use databases that are provided
+
 ## 0.0.11
 
 ### Patch Changes
