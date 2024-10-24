@@ -104,12 +104,10 @@ export const valueToPostgresType = (
       case "boolean":
         return "BOOLEAN";
       default:
-        return yield* Effect.fail(
-          new UnsupportedJSTypeDbConversionError({
-            cause: null,
-            message: `Unsupported JS type in postgres for provided value: ${typeof value}`,
-          }),
-        );
+        return yield* new UnsupportedJSTypeDbConversionError({
+          cause: null,
+          message: `Unsupported JS type in postgres for provided value: ${typeof value}`,
+        });
     }
   });
 

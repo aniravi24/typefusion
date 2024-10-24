@@ -101,12 +101,10 @@ export const valueToClickhouseType = (
       case "boolean":
         return "Bool";
       default:
-        return yield* Effect.fail(
-          new UnsupportedJSTypeDbConversionError({
-            cause: null,
-            message: `Unsupported JS type in Clickhouse for provided value: ${typeof value}`,
-          }),
-        );
+        return yield* new UnsupportedJSTypeDbConversionError({
+          cause: null,
+          message: `Unsupported JS type in Clickhouse for provided value: ${typeof value}`,
+        });
     }
   });
 

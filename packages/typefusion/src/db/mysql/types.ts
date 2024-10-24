@@ -84,12 +84,10 @@ export const valueToMySqlType = (
       case "boolean":
         return "BOOLEAN";
       default:
-        return yield* Effect.fail(
-          new UnsupportedJSTypeDbConversionError({
-            cause: null,
-            message: `Unsupported JS type in mysql for provided value: ${typeof value}`,
-          }),
-        );
+        return yield* new UnsupportedJSTypeDbConversionError({
+          cause: null,
+          message: `Unsupported JS type in mysql for provided value: ${typeof value}`,
+        });
     }
   });
 

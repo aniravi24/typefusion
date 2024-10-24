@@ -284,12 +284,10 @@ const convertTypefusionScriptResultToSQLDDL = (
     // If no database types are provided, we will infer them from the result data
     if (!module.schema || Object.keys(module.schema).length === 0) {
       if (result.data.length === 0) {
-        yield* Effect.fail(
-          new ConvertDataToSQLDDLError({
-            cause: null,
-            message: `Your data for script '${module.name}' is empty, please add types for module '${module.name}'. We can't infer the database types from an empty result.`,
-          }),
-        );
+        yield* new ConvertDataToSQLDDLError({
+          cause: null,
+          message: `Your data for script '${module.name}' is empty, please add types for module '${module.name}'. We can't infer the database types from an empty result.`,
+        });
       }
       yield* Effect.logDebug(
         `No database types provided for module '${module.name}', inferring from first item in result data.`,
@@ -383,12 +381,10 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
     } else {
       if (!resultIsValidSchema) {
         yield* Effect.logError("Invalid script run result: ", result);
-        yield* Effect.fail(
-          new DatabaseInsertError({
-            cause: null,
-            message: `Module '${module.name}' does not match expected schema, make sure your run function returns an object with the following shape: ${ScriptResultSchema.toString()}`,
-          }),
-        );
+        yield* new DatabaseInsertError({
+          cause: null,
+          message: `Module '${module.name}' does not match expected schema, make sure your run function returns an object with the following shape: ${ScriptResultSchema.toString()}`,
+        });
       }
       if (!moduleIsValidSchema) {
         yield* Effect.logError(
@@ -396,13 +392,11 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
           // We are going to assume that people at least provided a name
           (module as TypefusionScriptExport).name,
         );
-        yield* Effect.fail(
-          new DatabaseInsertError({
-            cause: null,
-            // We are going to assume that people at least provided a name
-            message: `Module '${(module as TypefusionScriptExport).name}' does not match expected schema, make sure your script returns an object with the following shape: ${ScriptExportSchema.toString()}`,
-          }),
-        );
+        yield* new DatabaseInsertError({
+          cause: null,
+          // We are going to assume that people at least provided a name
+          message: `Module '${(module as TypefusionScriptExport).name}' does not match expected schema, make sure your script returns an object with the following shape: ${ScriptExportSchema.toString()}`,
+        });
       }
     }
   });
