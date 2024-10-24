@@ -222,15 +222,54 @@ export class ConvertDataToSQLDDLError extends Data.TaggedError(
   message: string;
 }> {}
 
-const dbServiceAndHelper = (databaseType: TypefusionSupportedDatabases) => {
-  switch (databaseType) {
+export class InvalidDatabaseConfigError extends Data.TaggedError(
+  "InvalidDatabaseConfigError",
+)<{
+  cause: unknown;
+  message: string;
+}> {}
+
+const dbServiceAndHelper = (module: TypefusionScriptExport) => {
+  const errorText = (databaseType: TypefusionSupportedDatabases) =>
+    `${databaseType} database required by typefusion script '${module.name}' but not accessible, did you set the required environment variables?`;
+  switch (module.resultDatabase) {
     case "postgresql":
-      return { service: PgService, helper: PgDatabaseHelperService };
+      return {
+        service: PgService.pipe(
+          Effect.catchAllDefect(
+            (error) =>
+              new InvalidDatabaseConfigError({
+                cause: error,
+                message: errorText("postgresql"),
+              }),
+          ),
+        ),
+        helper: PgDatabaseHelperService,
+      };
     case "mysql":
-      return { service: MySQLService, helper: MySQLDatabaseHelperService };
+      return {
+        service: MySQLService.pipe(
+          Effect.catchAllDefect(
+            (error) =>
+              new InvalidDatabaseConfigError({
+                cause: error,
+                message: errorText("mysql"),
+              }),
+          ),
+        ),
+        helper: MySQLDatabaseHelperService,
+      };
     case "clickhouse":
       return {
-        service: ClickhouseService,
+        service: ClickhouseService.pipe(
+          Effect.catchAllDefect(
+            (error) =>
+              new InvalidDatabaseConfigError({
+                cause: error,
+                message: errorText("clickhouse"),
+              }),
+          ),
+        ),
         helper: ClickhouseDatabaseHelperService,
       };
   }
@@ -241,7 +280,7 @@ const convertTypefusionScriptResultToSQLDDL = (
   result: Schema.Schema.Type<typeof ScriptResultSchema>,
 ) =>
   Effect.gen(function* () {
-    const dbHelper = yield* dbServiceAndHelper(module.resultDatabase).helper;
+    const dbHelper = yield* dbServiceAndHelper(module).helper;
     // If no database types are provided, we will infer them from the result data
     if (!module.schema || Object.keys(module.schema).length === 0) {
       if (result.data.length === 0) {
@@ -293,8 +332,8 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
     const moduleIsValidSchema = Schema.is(ScriptExportSchema)(module);
 
     if (resultIsValidSchema && moduleIsValidSchema) {
-      const sql = yield* dbServiceAndHelper(module.resultDatabase).service;
-      const dbHelper = yield* dbServiceAndHelper(module.resultDatabase).helper;
+      const sql = yield* dbServiceAndHelper(module).service;
+      const dbHelper = yield* dbServiceAndHelper(module).helper;
 
       yield* dbHelper.dropTableIfExists(sql, module.name).pipe(
         Effect.mapError(
@@ -377,8 +416,8 @@ export class DatabaseSelectError extends Data.TaggedError(
 
 export const dbSelect = (module: TypefusionScriptExport) =>
   Effect.gen(function* () {
-    const sql = yield* dbServiceAndHelper(module.resultDatabase).service;
-    const dbHelper = yield* dbServiceAndHelper(module.resultDatabase).helper;
+    const sql = yield* dbServiceAndHelper(module).service;
+    const dbHelper = yield* dbServiceAndHelper(module).helper;
     return yield* dbHelper.selectAllFromTable(sql, module.name).pipe(
       Effect.mapError(
         (error) =>
