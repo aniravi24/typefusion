@@ -42,20 +42,20 @@
     "example-debug": "dotenv -- tsx src/cli.ts --log-level debug --ignore \"**/src/**\" ./test/examplejs"
   },
   "dependencies": {
-    "@effect/cli": "0.48.13",
-    "@effect/platform": "0.69.13",
-    "@effect/platform-node": "0.64.14",
+    "@effect/cli": "0.48.20",
+    "@effect/platform": "0.69.20",
+    "@effect/platform-node": "0.64.22",
     "@effect/sql": "0.18.14",
     "@effect/sql-clickhouse": "0.2.10",
     "@effect/sql-mysql2": "0.18.10",
     "@effect/sql-pg": "0.18.10",
-    "effect": "3.10.8",
+    "effect": "3.10.13",
     "postgres": "3.4.5",
     "skott": "0.35.3",
     "tslib": "2.8.1"
   },
   "devDependencies": {
-    "@effect/vitest": "0.13.8",
+    "@effect/vitest": "0.13.13",
     "@vitest/coverage-v8": "2.1.4",
     "dotenv-cli": "7.4.2",
     "tsx": "4.19.2",
