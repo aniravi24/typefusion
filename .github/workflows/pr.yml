@@ -31,6 +31,10 @@ jobs:
           - 3306:3306
       clickhouse:
         image: clickhouse/clickhouse-server:latest
+        env:
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: password
         ports:
           - 8123:8123
 
@@ -55,7 +59,7 @@ jobs:
         env:
           PG_DATABASE_URL: postgres://postgres:password@localhost:5432/typefusion?sslmode=disable
           MYSQL_DATABASE_URL: mysql://root:password@localhost:3306/typefusion
-          CLICKHOUSE_DATABASE_URL: http://localhost:8123/
+          CLICKHOUSE_DATABASE_URL: http://default:password@localhost:8123/
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         env:
