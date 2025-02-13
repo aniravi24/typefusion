@@ -1,20 +1,27 @@
 import { ClickhouseClient } from "@effect/sql-clickhouse";
 import { Config, Effect, Layer } from "effect";
+
 import { DatabaseHelper } from "../common/service.js";
 import {
-  chDropTableIfExists,
+  chColumnDDL,
   chCreateTableIfNotExists,
+  chDropTableIfExists,
   chInsertIntoTable,
   chSelectAllFromTable,
-  chColumnDDL,
 } from "./helpers.js";
-import { valueToClickhouseType, clickhouseIdColumn } from "./types.js";
+import { clickhouseIdColumn, valueToClickhouseType } from "./types.js";
 
 /**
  * @internal
  */
 export const ClickhouseDatabaseConfig = Config.all({
-  databaseUrl: Config.orElse(Config.string("CLICKHOUSE_DATABASE_URL"), () =>
+  database: Config.string("CLICKHOUSE_DATABASE").pipe(
+    Config.orElse(() => Config.succeed(undefined)),
+  ),
+  password: Config.string("CLICKHOUSE_PASSWORD").pipe(
+    Config.orElse(() => Config.succeed(undefined)),
+  ),
+  url: Config.orElse(Config.string("CLICKHOUSE_DATABASE_URL"), () =>
     Config.map(
       Config.all({
         CLICKHOUSE_HOST: Config.string("CLICKHOUSE_HOST"),
@@ -27,25 +34,16 @@ export const ClickhouseDatabaseConfig = Config.all({
   username: Config.string("CLICKHOUSE_USER").pipe(
     Config.orElse(() => Config.succeed(undefined)),
   ),
-  password: Config.string("CLICKHOUSE_PASSWORD").pipe(
-    Config.orElse(() => Config.succeed(undefined)),
-  ),
-  database: Config.string("CLICKHOUSE_DATABASE").pipe(
-    Config.orElse(() => Config.succeed(undefined)),
-  ),
 });
 
 /**
  * @internal
  */
 const ClickhouseLive = ClickhouseClient.layer({
-  url: Config.map(ClickhouseDatabaseConfig, (c) => c.databaseUrl),
-  username: Config.map(ClickhouseDatabaseConfig, (c) => c.username),
-  password: Config.map(ClickhouseDatabaseConfig, (c) => c.password),
-  database: Config.map(ClickhouseDatabaseConfig, (c) => c.database),
   clickhouse_settings: {
-    allow_experimental_json_type: Config.succeed(true),
+    allow_experimental_json_type: true,
   },
+  ...Effect.runSync(ClickhouseDatabaseConfig),
 });
 
 /**
@@ -54,8 +52,8 @@ const ClickhouseLive = ClickhouseClient.layer({
 export class ClickhouseService extends Effect.Service<ClickhouseService>()(
   "@typefusion/clickhouse",
   {
-    effect: ClickhouseClient.ClickhouseClient,
     dependencies: [ClickhouseLive],
+    effect: ClickhouseClient.ClickhouseClient,
   },
 ) {}
 
@@ -63,13 +61,13 @@ export class ClickhouseService extends Effect.Service<ClickhouseService>()(
  * @internal
  */
 export const ClickhouseDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
-  valueToDbType: valueToClickhouseType,
-  idColumn: clickhouseIdColumn,
-  dropTableIfExists: chDropTableIfExists,
+  columnDDL: chColumnDDL,
   createTableIfNotExists: chCreateTableIfNotExists,
+  dropTableIfExists: chDropTableIfExists,
+  idColumn: clickhouseIdColumn,
   insertIntoTable: chInsertIntoTable,
   selectAllFromTable: chSelectAllFromTable,
-  columnDDL: chColumnDDL,
+  valueToDbType: valueToClickhouseType,
 });
 
 /**
@@ -78,8 +76,8 @@ export const ClickhouseDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
 export class ClickhouseDatabaseHelperService extends Effect.Service<ClickhouseDatabaseHelperService>()(
   "@typefusion/clickhouse/databasehelper",
   {
-    effect: DatabaseHelper,
     dependencies: [ClickhouseDatabaseHelperLive],
+    effect: DatabaseHelper,
   },
 ) {}
 

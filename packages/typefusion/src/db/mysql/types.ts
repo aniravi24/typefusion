@@ -1,6 +1,7 @@
 import { Effect } from "effect";
-import { DbType, Nullable } from "../common/types.js";
+
 import { UnsupportedJSTypeDbConversionError } from "../common/service.js";
+import { DbType, Nullable } from "../common/types.js";
 
 /**
  * This is a simple wrapper class to represent a MySQL type that will be used to define a table.
@@ -31,21 +32,21 @@ export class MySqlType<Type> extends DbType<Type> {
 }
 
 export const mySqlType = {
-  text: () => new MySqlType<Nullable<string>>("TEXT"),
-  int: () => new MySqlType<Nullable<number>>("INT"),
+  bigint: () => new MySqlType<Nullable<bigint>>("BIGINT"),
+  binary: () => new MySqlType<Nullable<Uint8Array>>("BINARY"),
   boolean: () => new MySqlType<Nullable<boolean>>("BOOLEAN"),
+  char: (n: number) => new MySqlType<Nullable<string>>(`CHAR(${n})`),
   date: () => new MySqlType<Nullable<Date>>("DATE"),
   dateTime: () => new MySqlType<Nullable<Date>>("DATETIME"),
-  bigint: () => new MySqlType<Nullable<bigint>>("BIGINT"),
-  smallint: () => new MySqlType<Nullable<number>>("SMALLINT"),
-  float: () => new MySqlType<Nullable<number>>("FLOAT"),
-  double: () => new MySqlType<Nullable<number>>("DOUBLE"),
   decimal: () => new MySqlType<Nullable<number>>("DECIMAL"),
-  char: (n: number) => new MySqlType<Nullable<string>>(`CHAR(${n})`),
-  varchar: (n: number) => new MySqlType<Nullable<string>>(`VARCHAR(${n})`),
-  time: () => new MySqlType<Nullable<string>>("TIME"),
+  double: () => new MySqlType<Nullable<number>>("DOUBLE"),
+  float: () => new MySqlType<Nullable<number>>("FLOAT"),
+  int: () => new MySqlType<Nullable<number>>("INT"),
   json: () => new MySqlType<Nullable<object>>("JSON"),
-  binary: () => new MySqlType<Nullable<Uint8Array>>("BINARY"),
+  smallint: () => new MySqlType<Nullable<number>>("SMALLINT"),
+  text: () => new MySqlType<Nullable<string>>("TEXT"),
+  time: () => new MySqlType<Nullable<string>>("TIME"),
+  varchar: (n: number) => new MySqlType<Nullable<string>>(`VARCHAR(${n})`),
 };
 
 /**
@@ -83,6 +84,18 @@ export const valueToMySqlType = (
         return "DOUBLE";
       case "boolean":
         return "BOOLEAN";
+      case "symbol": {
+        return "TEXT"; // Convert symbols to their string representation
+      }
+      case "undefined": {
+        return "TEXT"; // Handle undefined as null-like value
+      }
+      case "function": {
+        return yield* new UnsupportedJSTypeDbConversionError({
+          cause: null,
+          message: "Functions cannot be stored in MySQL",
+        });
+      }
       default:
         return yield* new UnsupportedJSTypeDbConversionError({
           cause: null,

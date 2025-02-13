@@ -1,15 +1,16 @@
+import { SqlClient } from "@effect/sql";
 import { MysqlClient } from "@effect/sql-mysql2";
 import { Config, Effect, Layer, Redacted } from "effect";
-import { SqlClient } from "@effect/sql";
+
 import { DatabaseHelper } from "../common/service.js";
 import {
-  mySqlDropTableIfExists,
+  mySqlColumnDDL,
   mySqlCreateTableIfNotExists,
+  mySqlDropTableIfExists,
   mySqlInsertIntoTable,
   mySqlSelectAllFromTable,
-  mySqlColumnDDL,
 } from "./helpers.js";
-import { valueToMySqlType, mySqlIdColumn } from "./types.js";
+import { mySqlIdColumn, valueToMySqlType } from "./types.js";
 
 /**
  * @internal
@@ -42,7 +43,7 @@ export const MySqlDatabaseConfig = Config.orElse(
  * @internal
  */
 const MySqlLive = MysqlClient.layer({
-  url: MySqlDatabaseConfig,
+  url: Effect.runSync(MySqlDatabaseConfig),
 });
 
 /**
@@ -51,8 +52,8 @@ const MySqlLive = MysqlClient.layer({
 export class MySQLService extends Effect.Service<MySQLService>()(
   "@typefusion/mysql",
   {
-    effect: SqlClient.SqlClient,
     dependencies: [MySqlLive],
+    effect: SqlClient.SqlClient,
   },
 ) {}
 
@@ -60,13 +61,13 @@ export class MySQLService extends Effect.Service<MySQLService>()(
  * @internal
  */
 export const MySqlDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
-  valueToDbType: valueToMySqlType,
-  idColumn: mySqlIdColumn,
-  dropTableIfExists: mySqlDropTableIfExists,
+  columnDDL: mySqlColumnDDL,
   createTableIfNotExists: mySqlCreateTableIfNotExists,
+  dropTableIfExists: mySqlDropTableIfExists,
+  idColumn: mySqlIdColumn,
   insertIntoTable: mySqlInsertIntoTable,
   selectAllFromTable: mySqlSelectAllFromTable,
-  columnDDL: mySqlColumnDDL,
+  valueToDbType: valueToMySqlType,
 });
 
 /**
@@ -75,8 +76,8 @@ export const MySqlDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
 export class MySQLDatabaseHelperService extends Effect.Service<MySQLDatabaseHelperService>()(
   "@typefusion/mysql/databasehelper",
   {
-    effect: DatabaseHelper,
     dependencies: [MySqlDatabaseHelperLive],
+    effect: DatabaseHelper,
   },
 ) {}
 

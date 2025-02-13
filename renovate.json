@@ -15,5 +15,6 @@
       "matchUpdateTypes": ["patch"]
     }
   ],
-  "platformAutomerge": true
+  "platformAutomerge": true,
+  "prHourlyLimit": 10
 }

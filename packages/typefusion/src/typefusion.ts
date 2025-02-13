@@ -1,13 +1,14 @@
-import { Data, Effect } from "effect";
 import { FileSystem } from "@effect/platform";
 import { NodeFileSystem } from "@effect/platform-node";
+import { Data, Effect } from "effect";
 import skott from "skott";
+
+import { DatabaseLayer } from "./db/common/client.js";
 import {
-  traverseGraph,
   printExecutionGraph,
   runTypefusionScript,
+  traverseGraph,
 } from "./helpers.js";
-import { DatabaseLayer } from "./db/common/client.js";
 
 export const DependencyGraphGenerationError = Data.TaggedError(
   "DependencyGraphGenerationError",
@@ -17,11 +18,11 @@ export const DependencyGraphGenerationError = Data.TaggedError(
 }>;
 
 export interface TypefusionConfig {
+  alwaysPrintExecutionGraph?: boolean;
   directory: string;
+  dryRun?: boolean;
   ignoreGlob: string[];
   verbose: boolean;
-  alwaysPrintExecutionGraph?: boolean;
-  dryRun?: boolean;
 }
 
 /**
@@ -44,17 +45,17 @@ export const typefusion = (config: TypefusionConfig) =>
     );
 
     const { useGraph, getStructure } = yield* Effect.tryPromise({
-      try: async () =>
-        skott({
-          verbose: config.verbose,
-          cwd: absolutePath,
-          fileExtensions: [".js"],
-          ignorePatterns: config.ignoreGlob,
-        }),
       catch: (error) =>
         new DependencyGraphGenerationError({
           cause: error,
           message: `Error generating the dependency graph. Please open an issue at https://github.com/aniravi24/typefusion/issues.`,
+        }),
+      try: async () =>
+        skott({
+          cwd: absolutePath,
+          fileExtensions: [".js"],
+          ignorePatterns: config.ignoreGlob,
+          verbose: config.verbose,
         }),
     });
 

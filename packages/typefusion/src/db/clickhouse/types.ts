@@ -1,6 +1,7 @@
 import { Effect } from "effect";
-import { DbType, Nullable } from "../common/types.js";
+
 import { UnsupportedJSTypeDbConversionError } from "../common/service.js";
+import { DbType, Nullable } from "../common/types.js";
 
 /**
  * This is a simple wrapper class to represent a Clickhouse type that will be used to define a table.
@@ -31,21 +32,6 @@ export class ClickhouseType<Type> extends DbType<Type> {
 }
 
 export const clickhouseType = {
-  string: () => new ClickhouseType<Nullable<string>>("String"),
-  fixedString: (n: number) =>
-    new ClickhouseType<Nullable<string>>(`FixedString(${n})`),
-  uint8: () => new ClickhouseType<Nullable<number>>("UInt8"),
-  uint16: () => new ClickhouseType<Nullable<number>>("UInt16"),
-  uint32: () => new ClickhouseType<Nullable<number>>("UInt32"),
-  uint64: () => new ClickhouseType<Nullable<string>>("UInt64"),
-  int8: () => new ClickhouseType<Nullable<number>>("Int8"),
-  int16: () => new ClickhouseType<Nullable<number>>("Int16"),
-  int32: () => new ClickhouseType<Nullable<number>>("Int32"),
-  int64: () => new ClickhouseType<Nullable<string>>("Int64"),
-  float32: () => new ClickhouseType<Nullable<number>>("Float32"),
-  float64: () => new ClickhouseType<Nullable<number>>("Float64"),
-  decimal: (precision: number, scale: number) =>
-    new ClickhouseType<Nullable<number>>(`Decimal(${precision}, ${scale})`),
   boolean: () => new ClickhouseType<Nullable<boolean>>("Bool"),
   /**
    * Needs to be a date without the time, not an ISO string
@@ -60,14 +46,29 @@ export const clickhouseType = {
    */
   dateTime64: (precision: number) =>
     new ClickhouseType<Nullable<string>>(`DateTime64(${precision})`),
-  enum8: (values: Record<string, number>) =>
-    new ClickhouseType<Nullable<string>>(`Enum8(${JSON.stringify(values)})`),
+  decimal: (precision: number, scale: number) =>
+    new ClickhouseType<Nullable<number>>(`Decimal(${precision}, ${scale})`),
   enum16: (values: Record<string, number>) =>
     new ClickhouseType<Nullable<string>>(`Enum16(${JSON.stringify(values)})`),
-  uuid: () => new ClickhouseType<Nullable<string>>("UUID"),
+  enum8: (values: Record<string, number>) =>
+    new ClickhouseType<Nullable<string>>(`Enum8(${JSON.stringify(values)})`),
+  fixedString: (n: number) =>
+    new ClickhouseType<Nullable<string>>(`FixedString(${n})`),
+  float32: () => new ClickhouseType<Nullable<number>>("Float32"),
+  float64: () => new ClickhouseType<Nullable<number>>("Float64"),
+  int16: () => new ClickhouseType<Nullable<number>>("Int16"),
+  int32: () => new ClickhouseType<Nullable<number>>("Int32"),
+  int64: () => new ClickhouseType<Nullable<string>>("Int64"),
+  int8: () => new ClickhouseType<Nullable<number>>("Int8"),
   ipv4: () => new ClickhouseType<Nullable<string>>("IPv4"),
   ipv6: () => new ClickhouseType<Nullable<string>>("IPv6"),
   json: () => new ClickhouseType<Nullable<object>>("JSON"),
+  string: () => new ClickhouseType<Nullable<string>>("String"),
+  uint16: () => new ClickhouseType<Nullable<number>>("UInt16"),
+  uint32: () => new ClickhouseType<Nullable<number>>("UInt32"),
+  uint64: () => new ClickhouseType<Nullable<string>>("UInt64"),
+  uint8: () => new ClickhouseType<Nullable<number>>("UInt8"),
+  uuid: () => new ClickhouseType<Nullable<string>>("UUID"),
 };
 
 /**
@@ -100,6 +101,21 @@ export const valueToClickhouseType = (
         return "Float64";
       case "boolean":
         return "Bool";
+      case "bigint": {
+        return "Int64"; // Clickhouse Int64 can store bigint values
+      }
+      case "symbol": {
+        return "String"; // Convert symbols to their string representation
+      }
+      case "undefined": {
+        return "String"; // Handle undefined as null-like value
+      }
+      case "function": {
+        return yield* new UnsupportedJSTypeDbConversionError({
+          cause: null,
+          message: "Functions cannot be stored in Clickhouse",
+        });
+      }
       default:
         return yield* new UnsupportedJSTypeDbConversionError({
           cause: null,

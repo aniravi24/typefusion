@@ -1,8 +1,9 @@
 import { Effect } from "effect";
-import { DatabaseSelectError, dbSelect } from "./store.js";
 import { ConfigError } from "effect/ConfigError";
-import { TypefusionScriptExport } from "./types.js";
+
 import { DatabaseLayer } from "./db/common/client.js";
+import { DatabaseSelectError, dbSelect } from "./store.js";
+import { TypefusionScriptExport } from "./types.js";
 /**
  * Get the data from a module (i.e. the result of one of your Typefusion scripts).
  * @param module - The module to get the data from.
@@ -29,6 +30,7 @@ export const typefusionRef = async <T extends TypefusionScriptExport>(
         ? Awaited<ReturnType<T["run"]>>["data"]
         : never
 > => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return dbSelect(module).pipe(
     Effect.provide(DatabaseLayer),
     Effect.runPromise,
@@ -58,8 +60,9 @@ export const typefusionRefEffect = <T extends TypefusionScriptExport>(
       : T extends { run: (...args: any[]) => any }
         ? Awaited<ReturnType<T["run"]>>["data"]
         : never,
-  DatabaseSelectError | ConfigError
+  ConfigError | DatabaseSelectError
 > => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return dbSelect(module) as any;
 };
 
