@@ -14,14 +14,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: "Start setting up database containers"
-        run: |
-          # start preparing the database containers, if you run tests before these start up, you may get an error
-          docker run -d -p 5432:5432 -e POSTGRES_DB=typefusion -e POSTGRES_PASSWORD=password postgres:alpine
-          docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=typefusion mysql:latest
-          docker run -d -p 8123:8123 clickhouse/clickhouse-server:latest
+    services:
+      postgres:
+        image: postgres:alpine
+        env:
+          POSTGRES_DB: typefusion
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: typefusion
+        ports:
+          - 3306:3306
+      clickhouse:
+        image: clickhouse/clickhouse-server:latest
+        ports:
+          - 8123:8123
 
+    steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
