@@ -23,6 +23,7 @@ export const mySqlInsertIntoTable = (
   sql: SqlClient,
   tableName: string,
   data: unknown[],
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 ) => sql`INSERT INTO \`${sql.unsafe(tableName)}\` ${sql.insert(data as any)}`;
 
 /**

@@ -1,7 +1,7 @@
 import {
-  typefusionRef,
-  TypefusionDbScript,
   clickhouseType,
+  TypefusionDbScript,
+  typefusionRef,
 } from "../../src/index.js";
 import main from "../main.js";
 
@@ -12,7 +12,6 @@ const smallSchema = {
 export default {
   name: "typefusion_clickhouse_result",
   resultDatabase: "clickhouse",
-  schema: smallSchema,
   run: async () => {
     const result = await typefusionRef(main);
     console.log("TYPEFUSION CLICKHOUSE RESULT IS RUN", result);
@@ -24,4 +23,5 @@ export default {
       ],
     };
   },
+  schema: smallSchema,
 } satisfies TypefusionDbScript<typeof smallSchema>;

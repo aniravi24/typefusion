@@ -1,10 +1,11 @@
-import { Context, Data, Effect } from "effect";
-import { PgType } from "../postgres/types.js";
-import { MySqlType } from "../mysql/types.js";
 import { SqlClient } from "@effect/sql/SqlClient";
 import { Row } from "@effect/sql/SqlConnection";
-import { ClickhouseType } from "../clickhouse/types.js";
 import { ClickhouseClient } from "@effect/sql-clickhouse/ClickhouseClient";
+import { Context, Data, Effect } from "effect";
+
+import { ClickhouseType } from "../clickhouse/types.js";
+import { MySqlType } from "../mysql/types.js";
+import { PgType } from "../postgres/types.js";
 
 export class UnsupportedJSTypeDbConversionError extends Data.TaggedError(
   "UnsupportedJSTypeDbConversionError",
@@ -21,24 +22,6 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
   {
     /**
      * @internal
-     * @param value Any input
-     * @returns A string representing the closest DB type to that value.
-     */
-    readonly valueToDbType: (
-      value: unknown,
-    ) => Effect.Effect<string, UnsupportedJSTypeDbConversionError, never>;
-    /**
-     * @internal
-     * @param type a {@link PgType} or {@link MySqlType} or {@link ClickhouseType}
-     * @returns a string representing the id column DDL
-     */
-    readonly idColumn: <
-      T extends PgType<unknown> | MySqlType<unknown> | ClickhouseType<unknown>,
-    >(
-      type?: T,
-    ) => string;
-    /**
-     * @internal
      * @param columnName The name of the column
      * @param columnType The type of the column
      * @returns A string representing the column DDL
@@ -48,24 +31,34 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @internal
      * @param sql The SQL client
      * @param tableName The name of the table
-     * @returns An effect that will drop the table if it exists
+     * @param columnDefinitions The column definitions
+     * @returns An effect that will create the table if it does not exist
      */
-    readonly dropTableIfExists: (
-      sql: SqlClient | ClickhouseClient,
+    readonly createTableIfNotExists: (
+      sql: ClickhouseClient | SqlClient,
       tableName: string,
+      columnDefinitions: string,
     ) => Effect.Effect<void, unknown, never>;
     /**
      * @internal
      * @param sql The SQL client
      * @param tableName The name of the table
-     * @param columnDefinitions The column definitions
-     * @returns An effect that will create the table if it does not exist
+     * @returns An effect that will drop the table if it exists
      */
-    readonly createTableIfNotExists: (
-      sql: SqlClient | ClickhouseClient,
+    readonly dropTableIfExists: (
+      sql: ClickhouseClient | SqlClient,
       tableName: string,
-      columnDefinitions: string,
     ) => Effect.Effect<void, unknown, never>;
+    /**
+     * @internal
+     * @param type a {@link PgType} or {@link MySqlType} or {@link ClickhouseType}
+     * @returns a string representing the id column DDL
+     */
+    readonly idColumn: <
+      T extends ClickhouseType<unknown> | MySqlType<unknown> | PgType<unknown>,
+    >(
+      type?: T,
+    ) => string;
     /**
      * @internal
      * @param sql The SQL client
@@ -74,7 +67,7 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @returns An effect that will insert the data into the table
      */
     readonly insertIntoTable: (
-      sql: SqlClient | ClickhouseClient,
+      sql: ClickhouseClient | SqlClient,
       tableName: string,
       data: unknown[],
     ) => Effect.Effect<void, unknown, never>;
@@ -85,8 +78,16 @@ export class DatabaseHelper extends Context.Tag("@typefusion/databasehelper")<
      * @returns An effect that will select all from the table
      */
     readonly selectAllFromTable: (
-      sql: SqlClient | ClickhouseClient,
+      sql: ClickhouseClient | SqlClient,
       tableName: string,
     ) => Effect.Effect<readonly Row[], unknown, never>;
+    /**
+     * @internal
+     * @param value Any input
+     * @returns A string representing the closest DB type to that value.
+     */
+    readonly valueToDbType: (
+      value: unknown,
+    ) => Effect.Effect<string, UnsupportedJSTypeDbConversionError, never>;
   }
 >() {}

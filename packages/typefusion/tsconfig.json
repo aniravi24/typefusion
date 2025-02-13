@@ -5,5 +5,5 @@
   },
   "exclude": ["dist", "test/examplejs/**/*"],
   "extends": "../../tsconfig.json",
-  "include": ["*.ts", "*.mts", "src", "test", "example"],
+  "include": ["*.ts", "*.mts", "src", "test", "example"]
 }

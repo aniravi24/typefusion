@@ -1,21 +1,21 @@
-import { Schema } from "effect";
-import { Effect, Data } from "effect";
+import { Data, Effect, Schema } from "effect";
+
+import {
+  ClickhouseDatabaseHelperService,
+  ClickhouseService,
+} from "./db/clickhouse/client.js";
+import { ClickhouseType } from "./db/clickhouse/types.js";
+import { DbType } from "./db/common/types.js";
+import { MySQLDatabaseHelperService, MySQLService } from "./db/mysql/client.js";
+import { MySqlType } from "./db/mysql/types.js";
+import { PgDatabaseHelperService, PgService } from "./db/postgres/client.js";
+import { PgType } from "./db/postgres/types.js";
 import {
   TypefusionContextEffect,
   TypefusionScriptExport,
   TypefusionScriptResult,
   TypefusionSupportedDatabases,
 } from "./types.js";
-import { PgType } from "./db/postgres/types.js";
-import { MySqlType } from "./db/mysql/types.js";
-import { DbType } from "./db/common/types.js";
-import { PgDatabaseHelperService, PgService } from "./db/postgres/client.js";
-import { MySQLDatabaseHelperService, MySQLService } from "./db/mysql/client.js";
-import {
-  ClickhouseService,
-  ClickhouseDatabaseHelperService,
-} from "./db/clickhouse/client.js";
-import { ClickhouseType } from "./db/clickhouse/types.js";
 
 // For some reason when we dynamically import the PgType when executing scripts, somePgType instanceof PgType is false
 const PgTypeSchema = Schema.declare(<T>(input: unknown): input is PgType<T> => {
@@ -90,10 +90,10 @@ const ScriptResultSchema = Schema.Struct({
 export interface TypefusionScriptDataOnly<
   DataElement extends Record<string, unknown>,
 > extends TypefusionScriptExport {
+  run: () => PromiseLike<TypefusionScriptResult<DataElement>>;
   schema?: {
     [key in keyof DataElement]: DbType<DataElement[key]>;
   };
-  run: () => PromiseLike<TypefusionScriptResult<DataElement>>;
 }
 
 /**
@@ -102,14 +102,14 @@ export interface TypefusionScriptDataOnly<
 export interface TypefusionScriptDataOnlyEffect<
   DataElement extends Record<string, unknown>,
 > extends TypefusionScriptExport {
-  schema?: {
-    [key in keyof DataElement]: DbType<DataElement[key]>;
-  };
   runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
     TypefusionScriptResult<DataElement>,
     any,
     R
   >;
+  schema?: {
+    [key in keyof DataElement]: DbType<DataElement[key]>;
+  };
 }
 
 /**
@@ -118,12 +118,12 @@ export interface TypefusionScriptDataOnlyEffect<
  */
 export interface TypefusionDbScript<T extends Record<string, DbType<unknown>>>
   extends TypefusionScriptExport {
-  schema: T;
   run: () => PromiseLike<
     TypefusionScriptResult<{
       [key in keyof T]: T[key] extends DbType<infer U> ? U : never;
     }>
   >;
+  schema: T;
 }
 
 /**
@@ -133,7 +133,6 @@ export interface TypefusionDbScript<T extends Record<string, DbType<unknown>>>
 export interface TypefusionDbScriptEffect<
   T extends Record<string, DbType<unknown>>,
 > extends TypefusionScriptExport {
-  schema: T;
   runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
     TypefusionScriptResult<{
       [key in keyof T]: T[key] extends DbType<infer U> ? U : never;
@@ -141,6 +140,7 @@ export interface TypefusionDbScriptEffect<
     any,
     R
   >;
+  schema: T;
 }
 
 /**
@@ -151,8 +151,8 @@ export interface TypefusionDbScriptEffect<
 export interface TypefusionDbScriptDataUnknown<
   T extends Record<string, DbType<unknown>>,
 > extends TypefusionScriptExport {
-  schema: T;
   run: () => PromiseLike<TypefusionScriptResult<Record<any, any>>>;
+  schema: T;
 }
 
 /**
@@ -163,12 +163,12 @@ export interface TypefusionDbScriptDataUnknown<
 export interface TypefusionDbScriptDataUnknownEffect<
   T extends Record<string, DbType<unknown>>,
 > extends TypefusionScriptExport {
-  schema: T;
   runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
     TypefusionScriptResult<Record<any, any>>,
     any,
     R
   >;
+  schema: T;
 }
 
 /**
@@ -178,10 +178,10 @@ export interface TypefusionDbScriptDataUnknownEffect<
 
 export interface TypefusionScript<DataElement extends Record<string, unknown>>
   extends TypefusionScriptExport {
+  run: () => PromiseLike<TypefusionScriptResult<DataElement>>;
   schema: {
     [key in keyof DataElement]: DbType<DataElement[key]>;
   };
-  run: () => PromiseLike<TypefusionScriptResult<DataElement>>;
 }
 
 /**
@@ -191,29 +191,29 @@ export interface TypefusionScript<DataElement extends Record<string, unknown>>
 export interface TypefusionScriptEffect<
   DataElement extends Record<string, unknown>,
 > extends TypefusionScriptExport {
-  schema: {
-    [key in keyof DataElement]: DbType<DataElement[key]>;
-  };
   runEffect: <R extends TypefusionContextEffect>() => Effect.Effect<
     TypefusionScriptResult<DataElement>,
     any,
     R
   >;
+  schema: {
+    [key in keyof DataElement]: DbType<DataElement[key]>;
+  };
 }
 
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `run` function contains potentially only the return data.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
-export interface TypefusionScriptUnknown
-  extends TypefusionScript<Record<string, unknown>> {}
+export type TypefusionScriptUnknown = TypefusionScript<Record<string, unknown>>;
 
 /**
  * The type of a Typefusion script export ({@link TypefusionScriptExport}) when the result of the `runEffect` function contains potentially only the return data.
  * However, the data is unknown, so you can pass in any data array and it will type check.
  */
-export interface TypefusionScriptUnknownEffect
-  extends TypefusionScriptEffect<Record<string, unknown>> {}
+export type TypefusionScriptUnknownEffect = TypefusionScriptEffect<
+  Record<string, unknown>
+>;
 
 export class ConvertDataToSQLDDLError extends Data.TaggedError(
   "ConvertDataToSQLDDLError",
@@ -235,6 +235,7 @@ const dbServiceAndHelper = (module: TypefusionScriptExport) => {
   switch (module.resultDatabase) {
     case "postgresql":
       return {
+        helper: PgDatabaseHelperService,
         service: PgService.pipe(
           Effect.catchAllDefect(
             (error) =>
@@ -244,10 +245,10 @@ const dbServiceAndHelper = (module: TypefusionScriptExport) => {
               }),
           ),
         ),
-        helper: PgDatabaseHelperService,
       };
     case "mysql":
       return {
+        helper: MySQLDatabaseHelperService,
         service: MySQLService.pipe(
           Effect.catchAllDefect(
             (error) =>
@@ -257,10 +258,10 @@ const dbServiceAndHelper = (module: TypefusionScriptExport) => {
               }),
           ),
         ),
-        helper: MySQLDatabaseHelperService,
       };
     case "clickhouse":
       return {
+        helper: ClickhouseDatabaseHelperService,
         service: ClickhouseService.pipe(
           Effect.catchAllDefect(
             (error) =>
@@ -270,7 +271,6 @@ const dbServiceAndHelper = (module: TypefusionScriptExport) => {
               }),
           ),
         ),
-        helper: ClickhouseDatabaseHelperService,
       };
   }
 };
@@ -297,11 +297,11 @@ const convertTypefusionScriptResultToSQLDDL = (
         Object.entries(result.data[0]),
         ([key, value]) =>
           Effect.if(key === "id", {
-            onTrue: () => Effect.succeed(dbHelper.idColumn()),
             onFalse: () =>
               Effect.map(dbHelper.valueToDbType(value), (dbType) =>
                 dbHelper.columnDDL(key, dbType),
               ),
+            onTrue: () => Effect.succeed(dbHelper.idColumn()),
           }),
         { concurrency: "inherit" },
       ).pipe(Effect.map((col) => col.join(", ")));
@@ -390,12 +390,12 @@ export const dbInsert = (module: TypefusionScriptExport, result: unknown) =>
         yield* Effect.logError(
           "Invalid module export: ",
           // We are going to assume that people at least provided a name
-          (module as TypefusionScriptExport).name,
+          module.name,
         );
         yield* new DatabaseInsertError({
           cause: null,
           // We are going to assume that people at least provided a name
-          message: `Module '${(module as TypefusionScriptExport).name}' does not match expected schema, make sure your script returns an object with the following shape: ${ScriptExportSchema.toString()}`,
+          message: `Module '${module.name}' does not match expected schema, make sure your script returns an object with the following shape: ${ScriptExportSchema.toString()}`,
         });
       }
     }

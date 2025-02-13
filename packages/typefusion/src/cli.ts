@@ -3,6 +3,7 @@
 import { Args, Command, Options } from "@effect/cli";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { Effect, Option } from "effect";
+
 import { typefusion } from "./typefusion.js";
 
 const directory = Args.directory({ exists: "either" }).pipe(
@@ -20,14 +21,14 @@ const dryRun = Options.boolean("dry-run").pipe(Options.optional);
 
 const command = Command.make(
   "typefusion",
-  { directory, ignoreGlob, verbose, dryRun },
+  { directory, dryRun, ignoreGlob, verbose },
   ({ directory, ignoreGlob, verbose, dryRun }) =>
     typefusion({
+      alwaysPrintExecutionGraph: true,
       directory,
+      dryRun: Option.getOrElse(dryRun, () => false),
       ignoreGlob: Option.getOrElse(ignoreGlob, () => []),
       verbose: Option.getOrElse(verbose, () => false),
-      alwaysPrintExecutionGraph: true,
-      dryRun: Option.getOrElse(dryRun, () => false),
     }),
 );
 

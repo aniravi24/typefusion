@@ -1,17 +1,18 @@
-import { Config, Option, Layer, Effect } from "effect";
-import { PgDatabaseConfig, PgFinalLive } from "../postgres/client.js";
-import { MySqlDatabaseConfig, MySqlFinalLive } from "../mysql/client.js";
+import { Config, Effect, Layer, Option } from "effect";
+
 import {
   ClickhouseDatabaseConfig,
   ClickhouseFinalLive,
 } from "../clickhouse/client.js";
+import { MySqlDatabaseConfig, MySqlFinalLive } from "../mysql/client.js";
+import { PgDatabaseConfig, PgFinalLive } from "../postgres/client.js";
 
 export const DatabaseLayer = Layer.unwrapEffect(
   Effect.map(
     Config.all({
-      pg: Config.option(PgDatabaseConfig),
-      mysql: Config.option(MySqlDatabaseConfig),
       clickhouse: Config.option(ClickhouseDatabaseConfig),
+      mysql: Config.option(MySqlDatabaseConfig),
+      pg: Config.option(PgDatabaseConfig),
     }).pipe(
       Config.map(({ pg, mysql, clickhouse }) =>
         Layer.mergeAll(

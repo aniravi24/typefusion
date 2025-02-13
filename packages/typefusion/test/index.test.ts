@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/require-await */
-import { describe, it } from "vitest";
-import typefusion from "../src/index.js";
-import typefusionEffect from "../src/effect.js";
-
 import { it as itE } from "@effect/vitest";
+import { describe, it } from "vitest";
+
+import typefusionEffect from "../src/effect.js";
+import typefusion from "../src/index.js";
 
 const typefusionConfig = {
+  alwaysPrintExecutionGraph: true,
   directory: "./test/examplejs/example",
   ignoreGlob: ["**/src/**"],
   verbose: false,
-  alwaysPrintExecutionGraph: true,
 };
 
 describe("typefusion", () => {

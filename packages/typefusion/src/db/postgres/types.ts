@@ -1,6 +1,7 @@
 import { Effect } from "effect";
-import { DbType, Nullable } from "../common/types.js";
+
 import { UnsupportedJSTypeDbConversionError } from "../common/service.js";
+import { DbType, Nullable } from "../common/types.js";
 
 /**
  * This is a simple wrapper class to represent a Postgres type that will be used to define a table.
@@ -31,41 +32,41 @@ export class PgType<Type> extends DbType<Type> {
 }
 
 export const pgType = {
-  text: () => new PgType<Nullable<string>>("text"),
-  integer: () => new PgType<Nullable<number>>("integer"),
+  bigint: () => new PgType<Nullable<bigint>>("bigint"),
+  bigserial: () => new PgType<Nullable<bigint>>("bigserial"),
   boolean: () => new PgType<Nullable<boolean>>("boolean"),
+  box: () => new PgType<Nullable<string>>("box"),
+  bytea: () => new PgType<Nullable<Uint8Array>>("bytea"),
+  char: (n: number) => new PgType<Nullable<string>>(`char(${n})`),
+  cidr: () => new PgType<Nullable<string>>("cidr"),
+  circle: () => new PgType<Nullable<string>>("circle"),
   date: () => new PgType<Nullable<Date>>("date"),
   dateTime: () => new PgType<Nullable<Date>>("timestamp"),
-  bigint: () => new PgType<Nullable<bigint>>("bigint"),
-  smallint: () => new PgType<Nullable<number>>("smallint"),
-  real: () => new PgType<Nullable<number>>("real"),
-  doublePrecision: () => new PgType<Nullable<number>>("double precision"),
-  smallserial: () => new PgType<Nullable<number>>("smallserial"),
-  serial: () => new PgType<Nullable<number>>("serial"),
-  bigserial: () => new PgType<Nullable<bigint>>("bigserial"),
-  numeric: () => new PgType<Nullable<number>>("numeric"),
   decimal: () => new PgType<Nullable<number>>("decimal"),
-  money: () => new PgType<Nullable<number>>("money"),
-  char: (n: number) => new PgType<Nullable<string>>(`char(${n})`),
-  varchar: (n: number) => new PgType<Nullable<string>>(`varchar(${n})`),
-  time: () => new PgType<Nullable<string>>("time"),
-  interval: () => new PgType<Nullable<string>>("interval"),
-  point: () => new PgType<Nullable<string>>("point"),
-  line: () => new PgType<Nullable<string>>("line"),
-  lseg: () => new PgType<Nullable<string>>("lseg"),
-  box: () => new PgType<Nullable<string>>("box"),
-  polygon: () => new PgType<Nullable<string>>("polygon"),
-  circle: () => new PgType<Nullable<string>>("circle"),
+  doublePrecision: () => new PgType<Nullable<number>>("double precision"),
   inet: () => new PgType<Nullable<string>>("inet"),
-  cidr: () => new PgType<Nullable<string>>("cidr"),
-  macaddr: () => new PgType<Nullable<string>>("macaddr"),
-  tsvector: () => new PgType<Nullable<string>>("tsvector"),
-  tsquery: () => new PgType<Nullable<string>>("tsquery"),
-  uuid: () => new PgType<Nullable<string>>("uuid"),
+  integer: () => new PgType<Nullable<number>>("integer"),
+  interval: () => new PgType<Nullable<string>>("interval"),
   json: () => new PgType<Nullable<object>>("json"),
   jsonb: () => new PgType<Nullable<object>>("jsonb"),
+  line: () => new PgType<Nullable<string>>("line"),
+  lseg: () => new PgType<Nullable<string>>("lseg"),
+  macaddr: () => new PgType<Nullable<string>>("macaddr"),
+  money: () => new PgType<Nullable<number>>("money"),
+  numeric: () => new PgType<Nullable<number>>("numeric"),
+  point: () => new PgType<Nullable<string>>("point"),
+  polygon: () => new PgType<Nullable<string>>("polygon"),
+  real: () => new PgType<Nullable<number>>("real"),
+  serial: () => new PgType<Nullable<number>>("serial"),
+  smallint: () => new PgType<Nullable<number>>("smallint"),
+  smallserial: () => new PgType<Nullable<number>>("smallserial"),
+  text: () => new PgType<Nullable<string>>("text"),
+  time: () => new PgType<Nullable<string>>("time"),
+  tsquery: () => new PgType<Nullable<string>>("tsquery"),
+  tsvector: () => new PgType<Nullable<string>>("tsvector"),
+  uuid: () => new PgType<Nullable<string>>("uuid"),
+  varchar: (n: number) => new PgType<Nullable<string>>(`varchar(${n})`),
   xml: () => new PgType<Nullable<string>>("xml"),
-  bytea: () => new PgType<Nullable<Uint8Array>>("bytea"),
 };
 
 /**
@@ -103,6 +104,18 @@ export const valueToPostgresType = (
         return "DOUBLE PRECISION";
       case "boolean":
         return "BOOLEAN";
+      case "symbol": {
+        return "TEXT"; // Convert symbols to their string representation
+      }
+      case "undefined": {
+        return "TEXT"; // Handle undefined as null-like value
+      }
+      case "function": {
+        return yield* new UnsupportedJSTypeDbConversionError({
+          cause: null,
+          message: "Functions cannot be stored in Postgres",
+        });
+      }
       default:
         return yield* new UnsupportedJSTypeDbConversionError({
           cause: null,

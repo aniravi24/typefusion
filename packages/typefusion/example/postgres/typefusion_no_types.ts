@@ -4,9 +4,6 @@ import main from "../main.js";
 
 export default {
   name: "typefusion_no_types",
-  schema: {
-    noTypes: pgType.text(),
-  },
   resultDatabase: "postgresql",
   run: async () => {
     const result = await typefusionRef(main);
@@ -18,5 +15,8 @@ export default {
         },
       ],
     };
+  },
+  schema: {
+    noTypes: pgType.text(),
   },
 };

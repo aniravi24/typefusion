@@ -1,16 +1,17 @@
+import { SqlClient } from "@effect/sql";
 import { PgClient } from "@effect/sql-pg";
 import { Config, Effect, Layer, Redacted } from "effect";
 import postgres from "postgres";
-import { SqlClient } from "@effect/sql";
+
 import { DatabaseHelper } from "../common/service.js";
 import {
-  pgDropTableIfExists,
+  pgColumnDDL,
   pgCreateTableIfNotExists,
+  pgDropTableIfExists,
   pgInsertIntoTable,
   pgSelectAllFromTable,
-  pgColumnDDL,
 } from "./helpers.js";
-import { valueToPostgresType, postgresIdColumn } from "./types.js";
+import { postgresIdColumn, valueToPostgresType } from "./types.js";
 
 /**
  * @internal
@@ -37,32 +38,32 @@ export const PgDatabaseConfig = Config.orElse(
  * @internal
  */
 const PgLive = PgClient.layer({
-  url: PgDatabaseConfig,
-  types: Config.succeed({
+  onnotice: () => {},
+  types: {
     bigint: postgres.BigInt,
-  }),
-  onnotice: Config.succeed(() => {}),
+  },
+  url: Effect.runSync(PgDatabaseConfig),
 });
 
 /**
  * @internal
  */
 export class PgService extends Effect.Service<PgService>()("@typefusion/pg", {
-  effect: SqlClient.SqlClient,
   dependencies: [PgLive],
+  effect: SqlClient.SqlClient,
 }) {}
 
 /**
  * @internal
  */
 export const PgDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
-  valueToDbType: valueToPostgresType,
-  idColumn: postgresIdColumn,
-  dropTableIfExists: pgDropTableIfExists,
+  columnDDL: pgColumnDDL,
   createTableIfNotExists: pgCreateTableIfNotExists,
+  dropTableIfExists: pgDropTableIfExists,
+  idColumn: postgresIdColumn,
   insertIntoTable: pgInsertIntoTable,
   selectAllFromTable: pgSelectAllFromTable,
-  columnDDL: pgColumnDDL,
+  valueToDbType: valueToPostgresType,
 });
 
 /**
@@ -71,8 +72,8 @@ export const PgDatabaseHelperLive = Layer.succeed(DatabaseHelper, {
 export class PgDatabaseHelperService extends Effect.Service<PgDatabaseHelperService>()(
   "@typefusion/pg/databasehelper",
   {
-    effect: DatabaseHelper,
     dependencies: [PgDatabaseHelperLive],
+    effect: DatabaseHelper,
   },
 ) {}
 

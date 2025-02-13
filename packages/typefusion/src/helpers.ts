@@ -1,5 +1,6 @@
 import { Data, Effect, LogLevel } from "effect";
 import { SkottNode } from "skott/graph/node";
+
 import { dbInsert } from "./store.js";
 import { TypefusionScriptModule } from "./types.js";
 
@@ -62,27 +63,27 @@ export function runTypefusionScript(leaf: string) {
     const path = `../${leaf}`;
 
     const moduleDefault = yield* Effect.tryPromise({
-      try: async () =>
-        import(path).then(
-          (module) => (module as TypefusionScriptModule).default,
-        ),
       catch: (error) =>
         new ModuleImportError({
           cause: error,
           message: `Error importing module '${leaf}' using path '${path}'`,
         }),
+      try: async () =>
+        import(path).then(
+          (module) => (module as TypefusionScriptModule).default,
+        ),
     });
 
     const result = yield* moduleDefault.runEffect
       ? moduleDefault.runEffect()
       : Effect.tryPromise({
-          // Either runEffect or run must be defined, so we'll use the non-null assertion to satisfy TypeScript
-          try: async () => moduleDefault.run!(),
           catch: (error) =>
             new ModuleExecutionError({
               cause: error,
               message: `Error executing module '${leaf}'`,
             }),
+          // Either runEffect or run must be defined, so we'll use the non-null assertion to satisfy TypeScript
+          try: async () => moduleDefault.run!(),
         });
 
     return yield* dbInsert(moduleDefault, result);

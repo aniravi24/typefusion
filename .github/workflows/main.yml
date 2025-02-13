@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       generate_docs:
-        description: 'Generate and deploy docs'
+        description: "Generate and deploy docs"
         required: true
         default: false
         type: boolean

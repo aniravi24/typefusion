@@ -1,11 +1,11 @@
-import { ClickhouseClient } from "@effect/sql-clickhouse/ClickhouseClient";
 import { SqlClient } from "@effect/sql/SqlClient";
+import { ClickhouseClient } from "@effect/sql-clickhouse/ClickhouseClient";
 import { Effect } from "effect";
 /**
  * @internal
  */
 export const chDropTableIfExists = (
-  sql: SqlClient | ClickhouseClient,
+  sql: ClickhouseClient | SqlClient,
   tableName: string,
 ) => sql`DROP TABLE IF EXISTS ${sql.unsafe(tableName)}`;
 
@@ -13,7 +13,7 @@ export const chDropTableIfExists = (
  * @internal
  */
 export const chCreateTableIfNotExists = (
-  sql: SqlClient | ClickhouseClient,
+  sql: ClickhouseClient | SqlClient,
   tableName: string,
   columnDefinitions: string,
 ) => {
@@ -25,7 +25,7 @@ export const chCreateTableIfNotExists = (
  * @internal
  */
 export const chInsertIntoTable = (
-  sql: SqlClient | ClickhouseClient,
+  sql: ClickhouseClient | SqlClient,
   tableName: string,
   data: unknown[],
 ) =>
@@ -37,7 +37,7 @@ export const chInsertIntoTable = (
  * @internal
  */
 export const chSelectAllFromTable = (
-  sql: SqlClient | ClickhouseClient,
+  sql: ClickhouseClient | SqlClient,
   tableName: string,
 ) => sql`SELECT * FROM ${sql.unsafe(tableName)}`;
 
