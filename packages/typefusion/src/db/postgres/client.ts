@@ -37,12 +37,12 @@ export const PgDatabaseConfig = Config.orElse(
 /**
  * @internal
  */
-const PgLive = PgClient.layer({
-  onnotice: () => {},
+const PgLive = PgClient.layerConfig({
+  onnotice: Config.succeed(() => {}),
   types: {
-    bigint: postgres.BigInt,
+    bigint: Config.succeed(postgres.BigInt),
   },
-  url: Effect.runSync(PgDatabaseConfig),
+  url: PgDatabaseConfig,
 });
 
 /**

@@ -42,8 +42,8 @@ export const MySqlDatabaseConfig = Config.orElse(
 /**
  * @internal
  */
-const MySqlLive = MysqlClient.layer({
-  url: Effect.runSync(MySqlDatabaseConfig),
+const MySqlLive = MysqlClient.layerConfig({
+  url: MySqlDatabaseConfig,
 });
 
 /**

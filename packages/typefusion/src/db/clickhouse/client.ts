@@ -39,11 +39,14 @@ export const ClickhouseDatabaseConfig = Config.all({
 /**
  * @internal
  */
-const ClickhouseLive = ClickhouseClient.layer({
+const ClickhouseLive = ClickhouseClient.layerConfig({
   clickhouse_settings: {
-    allow_experimental_json_type: true,
+    allow_experimental_json_type: Config.succeed(true),
   },
-  ...Effect.runSync(ClickhouseDatabaseConfig),
+  database: Config.map(ClickhouseDatabaseConfig, (c) => c.database),
+  password: Config.map(ClickhouseDatabaseConfig, (c) => c.password),
+  url: Config.map(ClickhouseDatabaseConfig, (c) => c.url),
+  username: Config.map(ClickhouseDatabaseConfig, (c) => c.username),
 });
 
 /**
