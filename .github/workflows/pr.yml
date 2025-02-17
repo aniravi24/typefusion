@@ -61,6 +61,6 @@ jobs:
           MYSQL_DATABASE_URL: mysql://root:password@localhost:3306/typefusion
           CLICKHOUSE_DATABASE_URL: http://default:password@localhost:8123/
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
