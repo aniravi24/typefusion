@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.13
+
+### Patch Changes
+
+- [`b9ada71`](https://github.com/aniravi24/typefusion/commit/b9ada7155d9c3d75c1ed5e495bea252adc694692) Thanks [@aniravi24](https://github.com/aniravi24)! - remove version output for cli for now
+
 ## 0.0.12
 
 ### Patch Changes
