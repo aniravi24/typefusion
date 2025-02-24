@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy docs to gh-pages
         if: steps.changesets.outputs.published == 'true' || github.event.inputs.generate_docs == 'true'
-        uses: JamesIves/github-pages-deploy-action@v4.7.2
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           branch: gh-pages
           folder: docs
