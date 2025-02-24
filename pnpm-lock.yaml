@@ -124,8 +124,8 @@ importers:
         version: 2.8.1
     devDependencies:
       '@effect/vitest':
-        specifier: 0.18.1
-        version: 0.18.1(effect@3.13.2)(vitest@3.0.6(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))
+        specifier: 0.19.0
+        version: 0.19.0(effect@3.13.2)(vitest@3.0.6(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))
       '@vitest/coverage-v8':
         specifier: 3.0.6
         version: 3.0.6(vitest@3.0.6(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))
@@ -429,11 +429,11 @@ packages:
     peerDependencies:
       effect: ^3.12.11
 
-  '@effect/vitest@0.18.1':
-    resolution: {integrity: sha512-aRAupCEnYIx2O6lBncw1SA/harBQEsdIgZ9dLhb2LmRnsw24pJZDq7gV5jkuMYY7fgPEgVEHTJv/GynUvM+5Nw==}
+  '@effect/vitest@0.19.0':
+    resolution: {integrity: sha512-KkyCAIpEl0S9HheF4+a6UrLW5cgn6W+H7JlMPt+pZiehkBQHVIdsVuzRpk/ZFdgVJNMHE+Xh2ZOKPoGJZnu0Fg==}
     peerDependencies:
-      effect: ^3.13.1
-      vitest: ^2.0.5
+      effect: ^3.13.2
+      vitest: ^3.0.0
 
   '@esbuild/aix-ppc64@0.24.2':
     resolution: {integrity: sha512-thpVCb/rhxE/BnMLQ7GReQLLN8q9qbHmI55F4489/ByVg2aQaQ6kbcLb6FHkocZzQhxc4gx0sCk0tJkKBFzDhA==}
@@ -4255,7 +4255,7 @@ snapshots:
     dependencies:
       effect: 3.13.2
 
-  '@effect/vitest@0.18.1(effect@3.13.2)(vitest@3.0.6(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))':
+  '@effect/vitest@0.19.0(effect@3.13.2)(vitest@3.0.6(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       effect: 3.13.2
       vitest: 3.0.6(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0)
