@@ -7,7 +7,10 @@
   "extends": ["config:base", "schedule:weekly", ":pinOnlyDevDependencies"],
   "major": { "draftPR": true },
   "packageRules": [
-    { "groupName": "effect", "matchPackageNames": ["effect", "@effect**"] },
+    {
+      "groupName": "effect",
+      "matchPackageNames": ["effect", "@effect/{/,}**"]
+    },
     {
       "groupName": "all patches",
       "groupSlug": "all-patch",
