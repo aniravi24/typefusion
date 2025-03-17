@@ -90,8 +90,8 @@ importers:
   packages/typefusion:
     dependencies:
       '@effect/cli':
-        specifier: 0.56.4
-        version: 0.56.4(@effect/platform@0.77.4(effect@3.13.11))(@effect/printer-ansi@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(@effect/printer@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(effect@3.13.11)
+        specifier: 0.58.2
+        version: 0.58.2(@effect/platform@0.77.4(effect@3.13.11))(@effect/printer-ansi@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(@effect/printer@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(effect@3.13.11)
       '@effect/platform':
         specifier: 0.77.4
         version: 0.77.4(effect@3.13.11)
@@ -356,13 +356,13 @@ packages:
     resolution: {integrity: sha512-LRjP623jPyf3Poyfb0ohMj8I3ORyBDOwXAgxxVPbSD0unJuW2mJWeiRfaQinjtccMqC5Wy1HOMfa4btKjbNxbg==}
     engines: {node: '>=v18'}
 
-  '@effect/cli@0.56.4':
-    resolution: {integrity: sha512-1xEqfo4T53gEdwq9gTQkEA8qwTxrV3bP+2X/jmZIDHziQhV29ZB6RhdLHRH336KdPQ8VesQ5fpqsAParTWF+Xw==}
+  '@effect/cli@0.58.2':
+    resolution: {integrity: sha512-agOCHoGlDXincnWgbeZ204PRra/dmuw39YKJ8CIP+K+ol7Uz08TER8GGwZyqn6r3e1neRAocsZiykJ3fyIL4qA==}
     peerDependencies:
-      '@effect/platform': ^0.77.4
-      '@effect/printer': ^0.41.4
-      '@effect/printer-ansi': ^0.41.4
-      effect: ^3.13.4
+      '@effect/platform': ^0.79.2
+      '@effect/printer': ^0.41.11
+      '@effect/printer-ansi': ^0.41.11
+      effect: ^3.13.11
 
   '@effect/experimental@0.40.0':
     resolution: {integrity: sha512-7WvvnhnQUXPh4xOFrjXjs9KaG1/6gCmwDElCm0Xw0kLz0+RJy3zsCydwabkhWVOGMoO+0fsOtCbRcBEompI6gg==}
@@ -4066,7 +4066,7 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.1
       chalk: 5.4.1
 
-  '@effect/cli@0.56.4(@effect/platform@0.77.4(effect@3.13.11))(@effect/printer-ansi@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(@effect/printer@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(effect@3.13.11)':
+  '@effect/cli@0.58.2(@effect/platform@0.77.4(effect@3.13.11))(@effect/printer-ansi@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(@effect/printer@0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11))(effect@3.13.11)':
     dependencies:
       '@effect/platform': 0.77.4(effect@3.13.11)
       '@effect/printer': 0.40.11(@effect/typeclass@0.31.11(effect@3.13.11))(effect@3.13.11)
