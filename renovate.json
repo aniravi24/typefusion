@@ -8,14 +8,14 @@
   "major": { "draftPR": true },
   "packageRules": [
     {
-      "groupName": "effect",
-      "matchPackageNames": ["effect", "@effect/{/,}**"]
-    },
-    {
       "groupName": "all patches",
       "groupSlug": "all-patch",
       "matchPackagePatterns": ["*"],
       "matchUpdateTypes": ["patch"]
+    },
+    {
+      "groupName": "effect",
+      "matchPackageNames": ["effect", "@effect/{/,}**"]
     }
   ],
   "platformAutomerge": true,
