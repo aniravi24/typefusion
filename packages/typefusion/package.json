@@ -42,7 +42,7 @@
     "example-debug": "dotenv -- tsx src/cli.ts --log-level debug --ignore \"**/src/**\" ./test/examplejs"
   },
   "dependencies": {
-    "@effect/cli": "0.56.4",
+    "@effect/cli": "0.58.2",
     "@effect/platform": "0.77.4",
     "@effect/platform-node": "0.73.4",
     "@effect/sql": "0.30.4",
