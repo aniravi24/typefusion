@@ -46,7 +46,7 @@
     "@effect/platform": "0.77.4",
     "@effect/platform-node": "0.75.2",
     "@effect/sql": "0.30.4",
-    "@effect/sql-clickhouse": "0.15.4",
+    "@effect/sql-clickhouse": "0.17.2",
     "@effect/sql-mysql2": "0.31.4",
     "@effect/sql-pg": "0.31.4",
     "effect": "3.13.11",
