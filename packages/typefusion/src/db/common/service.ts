@@ -1,18 +1,12 @@
 import { SqlClient } from "@effect/sql/SqlClient";
 import { Row } from "@effect/sql/SqlConnection";
 import { ClickhouseClient } from "@effect/sql-clickhouse/ClickhouseClient";
-import { Context, Data, Effect } from "effect";
+import { Context, Effect } from "effect";
 
 import { ClickhouseType } from "../clickhouse/types.js";
 import { MySqlType } from "../mysql/types.js";
 import { PgType } from "../postgres/types.js";
-
-export class UnsupportedJSTypeDbConversionError extends Data.TaggedError(
-  "UnsupportedJSTypeDbConversionError",
-)<{
-  cause: unknown;
-  message: string;
-}> {}
+import { UnsupportedJSTypeDbConversionError } from "./error.js";
 
 /**
  * @internal

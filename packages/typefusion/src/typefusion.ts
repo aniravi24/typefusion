@@ -62,7 +62,7 @@ export const typefusion = (config: TypefusionConfig) =>
     const { hasCircularDependencies, findCircularDependencies } = useGraph();
 
     if (hasCircularDependencies()) {
-      yield* Effect.fail(
+      return yield* Effect.fail(
         `You cannot have circular dependencies in your graph.\n  ${findCircularDependencies()
           .map((cycle) => cycle.join(" -> "))
           .join("\n")}`,

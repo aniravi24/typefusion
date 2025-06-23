@@ -6,7 +6,7 @@ import {
 } from "./typefusion.js";
 
 export * from "./db/clickhouse/types.js";
-export { UnsupportedJSTypeDbConversionError } from "./db/common/service.js";
+export { UnsupportedJSTypeDbConversionError } from "./db/common/error.js";
 export * from "./db/mysql/types.js";
 export * from "./db/postgres/types.js";
 export { ModuleExecutionError, ModuleImportError } from "./helpers.js";
