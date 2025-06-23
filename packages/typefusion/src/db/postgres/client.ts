@@ -73,10 +73,11 @@ export class PgDatabaseHelperService extends Effect.Service<PgDatabaseHelperServ
   "@typefusion/pg/databasehelper",
   {
     dependencies: [PgDatabaseHelperLive],
-    effect: DatabaseHelper,
+    effect: Effect.gen(function* () {
+      return yield* DatabaseHelper;
+    }),
   },
 ) {}
-
 /**
  * @internal
  */

@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 
-import { UnsupportedJSTypeDbConversionError } from "../common/service.js";
+import { UnsupportedJSTypeDbConversionError } from "../common/error.js";
 import { DbType, Nullable } from "../common/types.js";
 
 /**

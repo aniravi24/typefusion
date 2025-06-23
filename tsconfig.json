@@ -86,6 +86,11 @@
 
     /* Emit */
     "outDir": "./dist",
+    "plugins": [
+      {
+        "name": "@effect/language-service"
+      }
+    ],
     "removeComments": true,
     "resolveJsonModule": true,
     // "noPropertyAccessFromIndexSignature": true,       /* Enforces using indexed accessors for keys declared using an indexed type. */

@@ -77,7 +77,9 @@ export class MySQLDatabaseHelperService extends Effect.Service<MySQLDatabaseHelp
   "@typefusion/mysql/databasehelper",
   {
     dependencies: [MySqlDatabaseHelperLive],
-    effect: DatabaseHelper,
+    effect: Effect.gen(function* () {
+      return yield* DatabaseHelper;
+    }),
   },
 ) {}
 

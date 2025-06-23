@@ -80,7 +80,9 @@ export class ClickhouseDatabaseHelperService extends Effect.Service<ClickhouseDa
   "@typefusion/clickhouse/databasehelper",
   {
     dependencies: [ClickhouseDatabaseHelperLive],
-    effect: DatabaseHelper,
+    effect: Effect.gen(function* () {
+      return yield* DatabaseHelper;
+    }),
   },
 ) {}
 
