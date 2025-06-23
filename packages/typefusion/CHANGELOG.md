@@ -1,5 +1,11 @@
 # typefusion
 
+## 0.0.14
+
+### Patch Changes
+
+- [`73f7967`](https://github.com/aniravi24/typefusion/commit/73f7967652c38f2db99b5f0f5c7f2352900b8ecc) Thanks [@aniravi24](https://github.com/aniravi24)! - Fix Context.Tag Effect issue
+
 ## 0.0.13
 
 ### Patch Changes
