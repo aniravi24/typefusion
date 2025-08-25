@@ -46,7 +46,7 @@
     "tsup": "8.5.0",
     "turbo": "2.5.6",
     "typedoc": "0.28.10",
-    "typedoc-github-theme": "0.3.0",
+    "typedoc-github-theme": "0.3.1",
     "typescript": "5.9.2"
   },
   "packageManager": "pnpm@10.14.0"
