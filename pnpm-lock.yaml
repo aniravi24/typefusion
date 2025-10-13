@@ -81,11 +81,11 @@ importers:
         specifier: 2.5.8
         version: 2.5.8
       typedoc:
-        specifier: 0.28.13
-        version: 0.28.13(typescript@5.9.3)
+        specifier: 0.28.14
+        version: 0.28.14(typescript@5.9.3)
       typedoc-github-theme:
         specifier: 0.3.1
-        version: 0.3.1(typedoc@0.28.13(typescript@5.9.3))
+        version: 0.3.1(typedoc@0.28.14(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -3517,8 +3517,8 @@ packages:
     peerDependencies:
       typedoc: ~0.28.0
 
-  typedoc@0.28.13:
-    resolution: {integrity: sha512-dNWY8msnYB2a+7Audha+aTF1Pu3euiE7ySp53w8kEsXoYw7dMouV5A1UsTUY345aB152RHnmRMDiovuBi7BD+w==}
+  typedoc@0.28.14:
+    resolution: {integrity: sha512-ftJYPvpVfQvFzpkoSfHLkJybdA/geDJ8BGQt/ZnkkhnBYoYW6lBgPQXu6vqLxO4X75dA55hX8Af847H5KXlEFA==}
     engines: {node: '>= 18', pnpm: '>= 10'}
     hasBin: true
     peerDependencies:
@@ -7400,11 +7400,11 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typedoc-github-theme@0.3.1(typedoc@0.28.13(typescript@5.9.3)):
+  typedoc-github-theme@0.3.1(typedoc@0.28.14(typescript@5.9.3)):
     dependencies:
-      typedoc: 0.28.13(typescript@5.9.3)
+      typedoc: 0.28.14(typescript@5.9.3)
 
-  typedoc@0.28.13(typescript@5.9.3):
+  typedoc@0.28.14(typescript@5.9.3):
     dependencies:
       '@gerrit0/mini-shiki': 3.12.2
       lunr: 2.3.9
