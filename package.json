@@ -25,7 +25,7 @@
     "@changesets/cli": "2.29.7",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
-    "@effect/language-service": "0.40.0",
+    "@effect/language-service": "0.53.2",
     "@eslint/compat": "1.4.0",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.38.0",
